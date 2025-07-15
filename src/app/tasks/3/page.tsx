@@ -204,7 +204,7 @@ const DrawingTask3 = () => {
                 <div className="text-center flex flex-col items-center gap-6">
                     <p className="text-xl font-bold text-green-600">บันทึกคำตอบเรียบร้อย</p>
                     <p className="text-gray-600">คะแนนของคุณ: {score !== null ? score.toFixed(2) : 'N/A'}</p>
-                    <p className="text-gray-600">โปรดกดปุ่ม "ถัดไป" เพื่อทำแบบทดสอบข้อต่อไป</p>
+                    <p className="text-gray-600">โปรดกดปุ่ม &quot;ถัดไป&quot; เพื่อทำแบบทดสอบข้อต่อไป</p>
                     <TaskNavigation />
                 </div>
             )}

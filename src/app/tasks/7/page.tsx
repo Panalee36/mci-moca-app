@@ -141,7 +141,7 @@ const SubtractionTask7 = () => {
           <div className="mt-6 flex flex-col items-center gap-6">
             <div className="p-4 bg-green-100 border-l-4 border-green-500 text-green-800 rounded-lg w-full max-w-md text-center">
               <p className="font-bold text-lg">บันทึกคำตอบเรียบร้อย 👍</p>
-              <p className="text-base">กดปุ่ม "ถัดไป" เพื่อทำแบบทดสอบข้อต่อไปได้เลย</p>
+              <p className="text-base">กดปุ่ม &quot;ถัดไป&quot; เพื่อทำแบบทดสอบข้อต่อไปได้เลย</p>
             </div>
             <TaskNavigation />
           </div>

@@ -78,7 +78,7 @@ const ClockDrawingTask9 = () => {
         <div className="mt-6 flex flex-col items-center gap-6">
           <div className="p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded-lg w-full max-w-md text-center">
             <p className="font-bold">บันทึกคำตอบเรียบร้อย</p>
-            <p>โปรดกดปุ่ม "ถัดไป" เพื่อทำแบบทดสอบข้อต่อไป</p>
+            <p>โปรดกดปุ่ม &quot;ถัดไป&quot; เพื่อทำแบบทดสอบข้อต่อไป</p>
           </div>
           <TaskNavigation />
         </div>
@@ -89,12 +89,12 @@ const ClockDrawingTask9 = () => {
   return (
     <div className="w-full max-w-2xl mx-auto p-8 bg-white rounded-2xl shadow-lg text-center">
       <h2 className="text-2xl font-bold text-blue-800 mb-4">แบบทดสอบที่ 9: การวาดนาฬิกา</h2>
-      <p className="text-lg text-gray-700 mb-6"><strong>คำสั่ง:</strong> โปรดปรับเข็มนาฬิกาให้แสดงเวลา <strong>10 โมง 10 นาที (10:10)</strong></p>
-      
+      <p className="text-lg text-gray-700 mb-6"><strong>คำสั่ง:</strong> โปรดปรับเข็มนาฬิกาให้แสดงเวลา <strong>&quot;สิบโมงสิบนาที&quot; (10:10)</strong></p>
+
       <div ref={clockRef} className="relative w-[400px] h-[400px] mx-auto bg-contain bg-no-repeat bg-center" style={{ backgroundImage: `url(${clockImage.src})` }}>
         {/* Hour Hand */}
         <div
-          // ✅ FIX 1: ลบ class ที่เกี่ยวกับ transform ออก
+          // FIX 1: ลบ class ที่เกี่ยวกับ transform ออก
           className="absolute top-1/2 left-1/2 w-2 h-[25%] origin-bottom cursor-pointer group"
           style={{ transform: `translateX(-50%) translateY(-100%) rotate(${hourAngle}deg)` }}
           onMouseDown={() => setDragging('hour')}
@@ -115,7 +115,7 @@ const ClockDrawingTask9 = () => {
           {/* Hitbox area */}
           <div className="absolute top-0 left-1/2 w-8 h-8 bg-transparent transform -translate-x-1/2 -translate-y-1/2" />
         </div>
-        
+
         {/* Center Dot */}
         <div className="absolute top-1/2 left-1/2 w-3 h-3 bg-black rounded-full transform -translate-x-1/2 -translate-y-1/2" />
       </div>

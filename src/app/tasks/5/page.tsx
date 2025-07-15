@@ -79,7 +79,7 @@ const AttentionTask5 = () => {
         <div className="text-center flex flex-col items-center gap-6">
           <div className="p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded-lg w-full max-w-md text-center">
             <p className="font-bold">บันทึกคำตอบเรียบร้อย</p>
-            <p>โปรดกดปุ่ม "ถัดไป" เพื่อทำแบบทดสอบข้อต่อไป</p>
+            <p>โปรดกดปุ่ม &quot;ถัดไป&quot; เพื่อทำแบบทดสอบข้อต่อไป</p>
           </div>
           <TaskNavigation />
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useTest } from '../../context/TestContext';
 import { TaskNavigation } from '../../components/TaskNavigation';
 
@@ -29,7 +29,7 @@ const VisuospatialTask1 = () => {
   const padding = 30; // Reduced padding slightly to allow more offset range
 
   // Define the original base points
-  const basePoints: Point[] = [
+  const basePoints = useMemo(() => [
     {label: '1', x: 80, y: 80},
     {label: 'ก', x: 180, y: 60},
     {label: '2', x: 280, y: 90},
@@ -39,7 +39,7 @@ const VisuospatialTask1 = () => {
     {label: '4', x: 450, y: 250},
     {label: 'ง', x: 300, y: 300},
     {label: '5', x: 150, y: 250},
-  ];
+  ], []); // Use useMemo to prevent redefinition on every render
 
   // Function to generate points with a random offset
   const generateOffsetPoints = useCallback((): Point[] => {
@@ -70,7 +70,7 @@ const VisuospatialTask1 = () => {
       x: p.x + offsetX,
       y: p.y + offsetY,
     }));
-  }, [canvasWidth, canvasHeight, padding]); // Dependencies for useCallback
+  }, [basePoints, canvasWidth, canvasHeight, padding]); // Dependencies for useCallback
 
   useEffect(() => {
     // Generate new points with a random offset whenever the component mounts
@@ -222,7 +222,7 @@ const VisuospatialTask1 = () => {
         {score !== null && (
           <div className="mt-6 p-4 bg-blue-100 border-l-4 border-blue-500 text-blue-700 rounded-lg w-full max-w-md">
             <p className="text-xl font-bold text-green-600">คะแนนของคุณ: {score}</p>
-            <p className="text-gray-600">โปรดกดปุ่ม "ถัดไป" เพื่อทำแบบทดสอบข้อต่อไป</p>
+            <p className="text-gray-600">โปรดกดปุ่ม &quot;ถัดไป&quot; เพื่อทำแบบทดสอบข้อต่อไป</p>
           </div>
         )}
 

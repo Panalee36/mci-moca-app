@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 // 1. นำเข้า List คำศัพท์ทั้งหมดจากไฟล์ JSON
 import fullWordList from './thai-wordlist.json'; 
 import { useTest } from '../../context/TestContext';
@@ -31,6 +31,25 @@ const LanguageTask8 = () => {
   // useMemo จะช่วยให้การสร้าง Set นี้ทำงานเพียงครั้งเดียว แม้ component จะ re-render ก็ตาม
   const dictionarySet = useMemo(() => new Set(fullWordList), []);
 
+  const checkAnswers = useCallback(() => {
+    if (score !== null) return;
+
+    if (timerRef.current) clearTimeout(timerRef.current);
+
+    const userWords = text.split(/[\s\n]+/).filter(word => word.trim().length > 0);
+
+    const validWords = userWords.filter(word =>
+      word.startsWith(targetLetter) && dictionarySet.has(word)
+    );
+    
+    const uniqueValidWordsCount = new Set(validWords).size;
+    setCorrectWordCount(uniqueValidWordsCount);
+
+    const finalScore = uniqueValidWordsCount >= 11 ? 1 : 0;
+    setScore(finalScore);
+    updateScore(8, finalScore);
+  }, [score, text, targetLetter, dictionarySet, updateScore]);
+
   // 5. สุ่มตัวอักษรโจทย์เมื่อคอมโพเนนต์โหลดขึ้นมาครั้งแรก
   useEffect(() => {
     const randomLetter = CONSONANTS[Math.floor(Math.random() * CONSONANTS.length)];
@@ -49,30 +68,10 @@ const LanguageTask8 = () => {
     return () => {
       if(timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [isStarted, timeLeft]);
+  }, [isStarted, timeLeft, checkAnswers]);
 
   const startTest = () => {
     setIsStarted(true);
-  };
-
-  const checkAnswers = () => {
-    if (score !== null) return; 
-
-    if (timerRef.current) clearTimeout(timerRef.current);
-
-    const userWords = text.split(/[\s\n]+/).filter(word => word.trim().length > 0);
-
-    // 6. ตรวจสอบคำตอบโดยใช้ตัวอักษรโจทย์ (targetLetter) และพจนานุกรม (dictionarySet)
-    const validWords = userWords.filter(word =>
-      word.startsWith(targetLetter) && dictionarySet.has(word)
-    );
-    
-    const uniqueValidWordsCount = new Set(validWords).size;
-    setCorrectWordCount(uniqueValidWordsCount); // เก็บจำนวนคำที่ถูก
-
-    const finalScore = uniqueValidWordsCount >= 11 ? 1 : 0;
-    setScore(finalScore);
-    updateScore(8, finalScore); // Use correct task ID
   };
 
   // แสดงผลว่ากำลังโหลดโจทย์ หากยังสุ่มตัวอักษรไม่เสร็จ
@@ -85,7 +84,7 @@ const LanguageTask8 = () => {
       <h2 className="text-2xl font-bold text-blue-800 mb-4">แบบทดสอบ: ภาษา - การสร้างคำ</h2>
       <p className="text-lg text-gray-700 mb-6">
         {/* 7. แสดงตัวอักษรโจทย์ที่สุ่มมาได้ */}
-        <strong>คำสั่ง:</strong> โปรดบอกชื่อคำนามที่ขึ้นต้นด้วยตัวอักษร <strong>"{targetLetter}"</strong> ให้ได้มากที่สุดภายใน 1 นาที
+        <strong>คำสั่ง:</strong> โปรดบอกชื่อคำนามที่ขึ้นต้นด้วยตัวอักษร <strong>&quot;{targetLetter}&quot;</strong> ให้ได้มากที่สุดภายใน 1 นาที
       </p>
 
       {!isStarted ? (
@@ -114,7 +113,7 @@ const LanguageTask8 = () => {
           <div className="p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded-lg w-full max-w-md text-center">
             <p className="font-bold">หมดเวลา!</p>
             <p>คุณตอบคำที่ถูกต้องและไม่ซ้ำกันได้ {correctWordCount} คำ</p>
-            <p>โปรดกดปุ่ม "ถัดไป" เพื่อทำแบบทดสอบข้อต่อไป</p>
+            <p>โปรดกดปุ่ม &quot;ถัดไป&quot; เพื่อทำแบบทดสอบข้อต่อไป</p>
           </div>
           <TaskNavigation />
         </div>

@@ -5,8 +5,8 @@ import { useTest } from '../../context/TestContext';
 import { TaskNavigation } from '../../components/TaskNavigation';
 
 const trials = [
-  { id: 'forward', sequence: '2 1 8 5 4', instruction: 'โปรดพิมพ์ลำดับตัวเลขที่คุณเพิ่งเห็น', correctAnswer: '21854' },
-  { id: 'backward', sequence: '7 4 2', instruction: 'โปรดพิมพ์ลำดับตัวเลขที่คุณเพิ่งเห็นแบบย้อนกลับ', correctAnswer: '247' },
+  { id: 'forward', sequence: '2 1 8 5 4', instruction: 'กรุณาพิมพ์ลำดับตัวเลขที่คุณเพิ่งเห็น โดยพิมพ์ให้เป็นลำดับ “ย้อนกลับ”', correctAnswer: '45812' },
+  { id: 'backward', sequence: '7 4 2', instruction: 'กรุณาพิมพ์ลำดับตัวเลขที่คุณเพิ่งเห็น โดยพิมพ์ให้เป็นลำดับ “ย้อนกลับ”', correctAnswer: '247' },
 ];
 
 const AttentionTask5 = () => {
@@ -22,6 +22,11 @@ const AttentionTask5 = () => {
       return () => clearTimeout(timer);
     }
   }, [phase, trialIndex]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = e.target.value.replace(/[^\d]/g, '').split('').join(' ');
+    setUserInput(formatted);
+  };
 
   const checkAnswer = () => {
     const cleanedInput = userInput.replace(/\s+/g, '');
@@ -62,13 +67,14 @@ const AttentionTask5 = () => {
           <input
             type="text"
             value={userInput}
-            onChange={e => setUserInput(e.target.value)}
+            onChange={handleInputChange}
             className="w-full p-3 border border-gray-300 rounded-lg text-2xl text-center tracking-widest focus:ring-2 focus:ring-blue-400 focus:outline-none"
             placeholder="เช่น 1 2 3 4 5"
           />
           <button
             onClick={checkAnswer}
-            className="mt-8 px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors"
+            disabled={!userInput.trim()}
+            className="mt-8 px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
             ตรวจสอบคำตอบ
           </button>
@@ -81,7 +87,7 @@ const AttentionTask5 = () => {
             <p className="font-bold">บันทึกคำตอบเรียบร้อย</p>
             <p>โปรดกดปุ่ม &quot;ถัดไป&quot; เพื่อทำแบบทดสอบข้อต่อไป</p>
           </div>
-          <TaskNavigation />
+          <TaskNavigation showBackButton={false} />
         </div>
       )}
     </div>

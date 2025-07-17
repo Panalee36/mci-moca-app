@@ -169,7 +169,7 @@ const DrawingTask3 = () => {
 
     return (
         <div className="w-full max-w-4xl mx-auto p-8 bg-white rounded-2xl shadow-lg">
-            <h2 className="text-2xl font-bold text-center text-blue-800 mb-4">แบบทดสอบที่ 3: การวาดภาพ (Dot Game)</h2>
+            <h2 className="text-2xl font-bold text-center text-blue-800 mb-4">แบบทดสอบที่ 3: การวาดภาพ</h2>
 
             {phase === 'viewing' && (
                 <div className="text-center">
@@ -183,7 +183,7 @@ const DrawingTask3 = () => {
 
             {phase === 'drawing' && (
                 <div className="text-center">
-                    <p className="text-lg text-gray-700 mb-6"><strong>คำสั่ง:</strong> โปรดวาดเส้นใดก็ได้บน Canvas โดยการเชื่อมจุด</p>
+                    <p className="text-lg text-gray-700 mb-6"><strong>คำสั่ง:</strong> เริ่มจาดจุดไหนก่อนก็ได้โดยการเชื่อมจุด</p>
                     <div className="flex justify-center mb-4">
                         <canvas
                             ref={canvasRef}
@@ -195,17 +195,18 @@ const DrawingTask3 = () => {
                     </div>
                     <div className="flex justify-center gap-4 mt-4">
                         <button onClick={clearCanvas} className="px-6 py-2 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300 transition-colors">ล้างทั้งหมด</button>
-                        <button onClick={submitDrawing} className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors">ส่งคำตอบ</button>
+                        <button onClick={submitDrawing} disabled={drawnLines.length === 0} className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors">ส่งคำตอบ</button>
                     </div>
                 </div>
             )}
 
             {phase === 'finished' && (
                 <div className="text-center flex flex-col items-center gap-6">
-                    <p className="text-xl font-bold text-green-600">บันทึกคำตอบเรียบร้อย</p>
-                    <p className="text-gray-600">คะแนนของคุณ: {score !== null ? score.toFixed(2) : 'N/A'}</p>
-                    <p className="text-gray-600">โปรดกดปุ่ม &quot;ถัดไป&quot; เพื่อทำแบบทดสอบข้อต่อไป</p>
-                    <TaskNavigation />
+                    <div className="mt-6 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded-lg w-full max-w-md">
+                        <p className="text-xl font-bold">บันทึกคำตอบเรียบร้อย</p>
+                        <p>โปรดกดปุ่ม &quot;ถัดไป&quot; เพื่อทำแบบทดสอบข้อต่อไป</p>
+                    </div>
+                    <TaskNavigation showBackButton={false} />
                 </div>
             )}
         </div>

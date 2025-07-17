@@ -1,6 +1,8 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+"use client";
+
+import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 
 interface TestContextType {
@@ -31,39 +33,44 @@ export const TestProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [pathname]);
 
-  const updateScore = (taskId: number, score: number) => {
-    setScores(prevScores => ({
-      ...prevScores,
-      [taskId]: score,
-    }));
-  };
+  const updateScore = useCallback((taskId: number, score: number) => {
+    setScores(prevScores => {
+      // Prevent unnecessary updates if the score is already set
+      if (prevScores[taskId] === score) {
+        return prevScores;
+      }
+      return {
+        ...prevScores,
+        [taskId]: score,
+      };
+    });
+  }, []);
 
-  const setMemorizedWords = (words: string[]) => {
+  const setMemorizedWords = useCallback((words: string[]) => {
     setMemorizedWordsState(words);
-  };
+  }, []);
 
-  const goToNextTask = () => {
+  const goToNextTask = useCallback(() => {
     const nextTaskId = currentTask + 1;
     if (nextTaskId <= 13) { // 13 tasks in total
       router.push(`/tasks/${nextTaskId}`);
     } else {
       router.push('/results');
     }
-  };
+  }, [currentTask, router]);
 
-  const goToPreviousTask = () => {
+  const goToPreviousTask = useCallback(() => {
     const prevTaskId = currentTask - 1;
     if (prevTaskId >= 1) {
       router.push(`/tasks/${prevTaskId}`);
     }
-  };
+  }, [currentTask, router]);
 
-  const resetTest = () => {
+  const resetTest = useCallback(() => {
     setScores({});
     setMemorizedWordsState([]);
-    setCurrentTask(1);
     router.push('/');
-  };
+  }, [router]);
 
   const totalScore = Object.values(scores).reduce((acc, score) => acc + score, 0);
 

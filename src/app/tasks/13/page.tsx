@@ -14,8 +14,17 @@ const orientationItems = [
 ];
 
 const OrientationTask13 = () => {
+  const thaiDays = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
+  const thaiMonths = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+  const days = Array.from({ length: 31 }, (_, i) => (i + 1).toString());
+  const currentBEYear = new Date().getFullYear() + 543;
+  const years = Array.from({ length: 21 }, (_, i) => (currentBEYear - 10 + i).toString());
+  const seasons = ['ฤดูฝน', 'ฤดูหนาว', 'ฤดูร้อน'];
+  const timesOfDay = ['ตอนเช้า', 'ตอนบ่าย', 'ตอนเย็น'];
+
   const { updateScore } = useTest();
   const [answers, setAnswers] = useState(Array(6).fill(''));
+  const [isCompleted, setIsCompleted] = useState(false);
   const [currentDate, setCurrentDate] = useState({ date: '', month: '', year: '', day: '', season: '', timeOfDay: '' });
 
   useEffect(() => {
@@ -60,24 +69,33 @@ const OrientationTask13 = () => {
     const newAnswers = [...answers];
     newAnswers[index] = value;
     setAnswers(newAnswers);
+    setIsCompleted(newAnswers.every(answer => answer !== ''));
   };
 
   const calculateScore = () => {
     let score = 0;
-    const correctAnswers = [
-      currentDate.date,
-      currentDate.month,
-      currentDate.year,
-      currentDate.day,
-      currentDate.season,
-      currentDate.timeOfDay,
-    ];
+    const [dateAns, monthAns, yearAns, dayAns, seasonAns, timeOfDayAns] = answers;
 
-    answers.forEach((answer, index) => {
-      if (answer.trim() === correctAnswers[index]) {
-        score++;
-      }
-    });
+    // Scoring based on matching current date information
+    if (yearAns.trim() === currentDate.year) {
+      score++;
+    }
+    if (monthAns.trim() === currentDate.month) {
+      score++;
+    }
+    if (dateAns.trim() === currentDate.date) {
+      score++;
+    }
+    if (dayAns.trim() === currentDate.day) {
+      score++;
+    }
+    if (seasonAns.trim() === currentDate.season) {
+      score++;
+    }
+    if (timeOfDayAns.trim() === currentDate.timeOfDay) {
+      score++;
+    }
+
     return score;
   };
 
@@ -94,20 +112,27 @@ const OrientationTask13 = () => {
         {orientationItems.map((item, index) => (
           <div key={item.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
             <label htmlFor={item.id} className="text-lg font-medium text-gray-800">{item.label}</label>
-            <input
-              type="text"
+                        <select
               id={item.id}
               value={answers[index]}
               onChange={(e) => handleInputChange(index, e.target.value)}
               className="w-48 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-            />
+            >
+              <option value="">เลือก...</option>
+              {item.id === 'date' && days.map(d => <option key={d} value={d}>{d}</option>)}
+              {item.id === 'month' && thaiMonths.map(m => <option key={m} value={m}>{m}</option>)}
+              {item.id === 'year' && years.map(y => <option key={y} value={y}>{y}</option>)}
+              {item.id === 'day' && thaiDays.map(d => <option key={d} value={d}>{d}</option>)}
+              {item.id === 'season' && seasons.map(s => <option key={s} value={s}>{s}</option>)}
+              {item.id === 'timeOfDay' && timesOfDay.map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
           </div>
         ))}
       </div>
 
             <div className="mt-8 flex flex-col items-center gap-6">
 
-                <TaskNavigation onFinish={() => updateScore(13, calculateScore())} />
+                <TaskNavigation onFinish={() => updateScore(13, calculateScore())} nextDisabled={!isCompleted} />
       </div>
     </div>
   );

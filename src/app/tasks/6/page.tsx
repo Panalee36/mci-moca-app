@@ -4,29 +4,32 @@ import { useState, useEffect, useRef } from 'react';
 import { useTest } from '../../context/TestContext';
 import { TaskNavigation } from '../../components/TaskNavigation';
 
-// Generate a sequence of 30 numbers, with a few '1's
+// Generate a sequence of 30 numbers with exactly three '1's at random positions.
 const generateSequence = () => {
-  const seq = [];
-  const onesPositions = [3, 7, 12, 18, 25]; // Example positions for '1'
-  for (let i = 0; i < 30; i++) {
-    if (onesPositions.includes(i)) {
-      seq.push(1);
-    } else {
-      seq.push(Math.floor(Math.random() * 8) + 2); // Random number from 2-9
-    }
+  // Create an array of 27 random numbers (2-9)
+  const nonOnes = Array.from({ length: 27 }, () => Math.floor(Math.random() * 8) + 2);
+  // Create an array with three '1's
+  const ones = [1, 1, 1];
+  // Combine them
+  const seq = [...nonOnes, ...ones];
+
+  // Shuffle the array to randomize the positions of '1's
+  for (let i = seq.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [seq[i], seq[j]] = [seq[j], seq[i]];
   }
+
   return seq;
 };
 
 const numberSequence = generateSequence();
-// ไม่ต้องใช้ totalOnes แล้ว เพราะเราจะจบเมื่อเจอ 1 ครั้งแรก
-// const totalOnes = numberSequence.filter(n => n === 1).length;
+const totalOnes = 3; // We have exactly 3 ones in the sequence.
 
 const AttentionTask6 = () => {
   const { updateScore } = useTest();
   const [index, setIndex] = useState(0);
-  const [hits, setHits] = useState(0); // hits ยังคงมีอยู่เผื่ออนาคต หรือเพื่อการแสดงผลเบื้องต้น
-  const [misses, setMisses] = useState(0); // misses ยังคงมีอยู่เผื่ออนาคต
+  const [hits, setHits] = useState(0); // Correct taps on '1'
+  const [errors, setErrors] = useState(0); // Incorrect taps on non-'1' numbers
   const [isFinished, setIsFinished] = useState(false);
   const [score, setScore] = useState<number | null>(null);
   const tappedForCurrentIndex = useRef(false);
@@ -38,18 +41,18 @@ const AttentionTask6 = () => {
     // ตราบใดที่ยังไม่จบการทดสอบและยังไม่แสดงครบทุกตัว
     if (index < numberSequence.length && !isFinished) {
       timerRef.current = setTimeout(() => {
+        // Move to the next number
         setIndex(prev => prev + 1);
-        tappedForCurrentIndex.current = false; // รีเซ็ตสถานะการแตะเมื่อตัวเลขเปลี่ยน
-      }, 2500); // แสดงแต่ละตัวเลข 2.5 วินาที (2500 มิลลิวินาที)
-      
-      // Cleanup function: เคลียร์ timer เมื่อ component unmount หรือ index เปลี่ยน
+        tappedForCurrentIndex.current = false; // Reset tap status for the new number
+      }, 2000); // Display each number for 1 second (1000 ms)
+
       return () => {
         if (timerRef.current) {
           clearTimeout(timerRef.current);
         }
       };
-    } else if (index >= numberSequence.length && !isFinished) { // ถ้าลำดับหมดแล้วและยังไม่จบ
-      // กรณีนี้เกิดขึ้นถ้าเลข 1 ไม่ปรากฏเลย หรือผู้ใช้ไม่กดเลข 1 เลยจนจบ 30 ตัว
+    } else if (index >= numberSequence.length && !isFinished) {
+      // The sequence is over, finish the test.
       setIsFinished(true);
     }
   }, [index, isFinished]); // เพิ่ม isFinished ใน dependency array
@@ -61,29 +64,24 @@ const AttentionTask6 = () => {
         return;
     } 
 
-    if (numberSequence[index] === 1) {
-      setHits(prev => prev + 1);
-      console.log("Hit! Found 1 and ended the test.");
+    const currentNumber = numberSequence[index];
 
-      // *** เมื่อเจอ 1 และกดได้ ให้จบแบบทดสอบทันที ***
-      if (timerRef.current) { // เคลียร์ timer เพื่อหยุดการเปลี่ยนเลข
-        clearTimeout(timerRef.current);
-      }
-      setIsFinished(true); // ตั้งค่าให้แบบทดสอบจบ
-      
+    if (currentNumber === 1) {
+      setHits(prev => prev + 1);
+      console.log(`Hit! Correctly tapped on 1. Total hits: ${hits + 1}`);
     } else {
-      setMisses(prev => prev + 1);
-      console.log("Miss! Tapped on a non-1 number.");
+      setErrors(prev => prev + 1);
+      console.log(`Error! Tapped on ${currentNumber}. Total errors: ${errors + 1}`);
     }
     tappedForCurrentIndex.current = true; // ตั้งค่าว่ามีการแตะแล้วสำหรับตัวเลขปัจจุบัน
   };
 
   const calculateScore = () => {
-    // ในโจทย์ใหม่นี้ คะแนนอาจจะเรียบง่ายขึ้น: 1 ถ้ากด 1 ได้ถูกต้อง, 0 ถ้าไม่
-    // หรือถ้าไม่ต้องการให้จบเร็ว อาจจะคำนวณตามเดิม
-    // แต่ถ้าจบเมื่อเจอ 1 ครั้งแรก ก็แค่เช็คว่า hits เป็น 1 หรือไม่
-    const finalScore = hits > 0 ? 1 : 0; // ถ้ากด 1 ได้อย่างน้อย 1 ครั้ง (ก็คือครั้งแรกนั่นเอง) ให้ได้ 1 คะแนน
-    return finalScore;
+    // ให้ 1 คะแนนถ้าตอบถูกทั้งหมด (hits = 3) และไม่มีข้อผิดพลาด (errors = 0)
+    if (hits === totalOnes && errors === 0) {
+      return 1;
+    }
+    return 0;
   };
 
   useEffect(() => {
@@ -91,11 +89,13 @@ const AttentionTask6 = () => {
       const finalScore = calculateScore();
       setScore(finalScore);
       updateScore(6, finalScore);
-      console.log("Test finished! Final Score:", finalScore);
-      console.log("Hits:", hits, "Misses:", misses);
+      console.log("Test finished!");
+      console.log(`Final Score: ${finalScore}`);
+      console.log(`Correct Hits: ${hits}`);
+      console.log(`Errors (taps on non-1): ${errors}`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isFinished, hits]); // เพิ่ม hits ใน dependency array เพื่อให้ calculateScore อัปเดตถูกต้อง
+  }, [isFinished]);
 
   return (
     <div className="w-full max-w-2xl mx-auto p-8 bg-white rounded-2xl shadow-lg text-center">
@@ -119,11 +119,8 @@ const AttentionTask6 = () => {
           <div className="p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded-lg w-full max-w-md text-center">
             <p className="font-bold">การทดสอบสิ้นสุดแล้ว</p>
             <p>โปรดกดปุ่ม &quot;ถัดไป&quot; เพื่อทำแบบทดสอบข้อต่อไป</p>
-            {score !== null && (
-                <p className="mt-2 text-lg">คะแนนของคุณ: {score === 1 ? 'ผ่าน' : 'ไม่ผ่าน'}</p>
-            )}
           </div>
-          <TaskNavigation />
+          <TaskNavigation showBackButton={false} />
         </div>
       )}
     </div>

@@ -15,7 +15,7 @@ const VisuospatialTask1 = () => {
   const { updateScore } = useTest();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [score, setScore] = useState<number | null>(null);
-  const userPath = useRef<number[]>([]);
+  const [userPath, setUserPath] = useState<number[]>([]);
   const isDrawing = useRef(false);
 
   // State to hold the randomly offset points
@@ -110,14 +110,14 @@ const VisuospatialTask1 = () => {
     });
 
     // Draw user path
-    if (userPath.current.length > 1) {
+    if (userPath.length > 1) {
       ctx.beginPath();
       ctx.strokeStyle = '#00acc1';
       ctx.lineWidth = 4;
-      const startPoint = points[userPath.current[0]];
+      const startPoint = points[userPath[0]];
       ctx.moveTo(startPoint.x, startPoint.y);
-      for (let i = 1; i < userPath.current.length; i++) {
-        const point = points[userPath.current[i]];
+      for (let i = 1; i < userPath.length; i++) {
+        const point = points[userPath[i]];
         ctx.lineTo(point.x, point.y);
       }
       ctx.stroke();
@@ -133,28 +133,32 @@ const VisuospatialTask1 = () => {
     if (!canvas) return;
 
     const handleMouseDown = (e: MouseEvent) => {
+      if (score !== null) return; // Don't allow drawing after submission
       isDrawing.current = true;
-      userPath.current = [];
       const pos = getMousePos(canvas, e);
+      let clickedPointIndex = -1;
       points.forEach((p, index) => {
         const dist = Math.hypot(p.x - pos.x, p.y - pos.y);
         if (dist < 22) {
-          userPath.current.push(index);
+          clickedPointIndex = index;
         }
       });
-      draw();
+      if (clickedPointIndex !== -1) {
+        setUserPath([clickedPointIndex]);
+      } else {
+        setUserPath([]);
+      }
     };
 
     const handleMouseMove = (e: MouseEvent) => {
-      if (!isDrawing.current) return;
+      if (!isDrawing.current || score !== null) return;
       const pos = getMousePos(canvas, e);
       points.forEach((p, index) => {
         const dist = Math.hypot(p.x - pos.x, p.y - pos.y);
-        if (dist < 22 && !userPath.current.includes(index)) {
-          userPath.current.push(index);
+        if (dist < 22 && !userPath.includes(index)) {
+          setUserPath(prevPath => [...prevPath, index]);
         }
       });
-      draw();
     };
 
     const handleMouseUp = () => {
@@ -172,23 +176,14 @@ const VisuospatialTask1 = () => {
       canvas.removeEventListener('mouseup', handleMouseUp);
       canvas.removeEventListener('mouseleave', handleMouseUp);
     };
-  }, [points, draw]); // Added points and draw as dependencies
+  }, [points, draw, score, userPath]);
 
   const checkAnswer = () => {
     // The correctPath still refers to the original conceptual order of labels (indices)
     // as the relative positions are maintained by the offset.
-    const correctPath = [0, 1, 2, 3, 4, 5, 6, 7, 8]; 
-    let isCorrect = true;
-    if (userPath.current.length !== correctPath.length) {
-      isCorrect = false;
-    } else {
-      for (let i = 0; i < correctPath.length; i++) {
-        if (userPath.current[i] !== correctPath[i]) {
-          isCorrect = false;
-          break;
-        }
-      }
-    }
+    const correctPath = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+    let isCorrect = userPath.length === correctPath.length &&
+      userPath.every((val, index) => val === correctPath[index]);
     const newScore = isCorrect ? 1 : 0;
     setScore(newScore);
     updateScore(1, newScore);
@@ -213,16 +208,16 @@ const VisuospatialTask1 = () => {
       <div className="flex flex-col items-center">
         <button
           onClick={checkAnswer}
-          disabled={score !== null}
+          disabled={userPath.length < 9 || score !== null}
           className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
         >
-          ตรวจคำตอบ
+          บันทึกคำตอบ
         </button>
 
         {score !== null && (
-          <div className="mt-6 p-4 bg-blue-100 border-l-4 border-blue-500 text-blue-700 rounded-lg w-full max-w-md">
-            <p className="text-xl font-bold text-green-600">คะแนนของคุณ: {score}</p>
-            <p className="text-gray-600">โปรดกดปุ่ม &quot;ถัดไป&quot; เพื่อทำแบบทดสอบข้อต่อไป</p>
+          <div className="mt-6 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded-lg w-full max-w-md">
+            <p className="text-xl font-bold">บันทึกคำตอบเรียบร้อย</p>
+            <p>โปรดกดปุ่ม &quot;ถัดไป&quot; เพื่อทำแบบทดสอบข้อต่อไป</p>
           </div>
         )}
 

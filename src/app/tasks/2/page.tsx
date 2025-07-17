@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { StaticImageData } from 'next/image';
-import lionImage from '../../img/animal/lion.jpg';
-import rhinocerosImage from '../../img/animal/rhinoceros.jpg';
-import camelImage from '../../img/animal/camel.jpg';
+import catImage from '../../img/cat/cat.png';
+import chickenImage from '../../img/chicken/chicken.jpg';
+import monkeyImage from '../../img/monkey/monkey.png';
 import { useTest } from '../../context/TestContext';
 import { TaskNavigation } from '../../components/TaskNavigation';
 import Image from 'next/image';
@@ -22,24 +22,24 @@ interface NamingQuestion {
 const questions: NamingQuestion[] = [
   {
     id: 1,
-    imageSrc: lionImage,
+    imageSrc: catImage,
     question: 'นี่คือตัวอะไร',
-    options: ['สิงโต', 'เสือ', 'แมว'],
-    correctAnswer: 'สิงโต',
+    options: ['ควาย', 'แมว', 'หมา'],
+    correctAnswer: 'แมว',
   },
   {
     id: 2,
-    imageSrc: rhinocerosImage,
+    imageSrc: chickenImage,
     question: 'นี่คือตัวอะไร',
-    options: ['แรด', 'ช้าง', 'ฮิปโป'],
-    correctAnswer: 'แรด',
+    options: ['ไก่', 'ช้าง', 'นก'],
+    correctAnswer: 'ไก่',
   },
   {
     id: 3,
-    imageSrc: camelImage,
+    imageSrc: monkeyImage,
     question: 'นี่คือตัวอะไร',
-    options: ['ม้า', 'อูฐ', 'ลา'],
-    correctAnswer: 'อูฐ',
+    options: ['ลิง', 'กบ', 'งู'],
+    correctAnswer: 'ลิง',
   },
 ];
 
@@ -111,7 +111,7 @@ const NamingTask = () => {
           </div>
         )}
 
-        <TaskNavigation nextDisabled={score === null} />
+        <TaskNavigation nextDisabled={score === null} showBackButton={false} />
       </div>
     </div>
   );

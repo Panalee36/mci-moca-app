@@ -7,11 +7,13 @@ import clockImage from '../../img/clock/clock.png';
 
 const ClockDrawingTask9 = () => {
   const { updateScore } = useTest();
-  // เริ่มต้นเวลาที่ 10:10 ตามโจทย์เพื่อให้ผู้ใช้เห็นภาพเริ่มต้น
-  const [time, setTime] = useState({ hour: 10, minute: 10 });
+  const [time, setTime] = useState({ hour: 12, minute: 0 });
   const [isFinished, setIsFinished] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
   const clockRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState<'hour' | 'minute' | null>(null);
+
+  const targetTime = { hour: 11, minute: 10, text: 'สิบเอ็ดโมงสิบนาที (11:10)' };
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!dragging || !clockRef.current) return;
@@ -60,9 +62,13 @@ const ClockDrawingTask9 = () => {
     };
   }, [dragging, handleMouseMove, handleMouseUp]);
 
+  const handleReset = () => {
+    setTime({ hour: 12, minute: 0 });
+    setHasInteracted(false);
+  };
+
   const handleSubmit = () => {
-    // Target time is 10:10
-    const isCorrect = time.hour === 10 && time.minute === 10;
+    const isCorrect = time.hour === targetTime.hour && time.minute === targetTime.minute;
     updateScore(9, isCorrect ? 1 : 0);
     setIsFinished(true);
   };
@@ -80,7 +86,7 @@ const ClockDrawingTask9 = () => {
             <p className="font-bold">บันทึกคำตอบเรียบร้อย</p>
             <p>โปรดกดปุ่ม &quot;ถัดไป&quot; เพื่อทำแบบทดสอบข้อต่อไป</p>
           </div>
-          <TaskNavigation />
+          <TaskNavigation showBackButton={false} />
         </div>
       </div>
     );
@@ -89,7 +95,7 @@ const ClockDrawingTask9 = () => {
   return (
     <div className="w-full max-w-2xl mx-auto p-8 bg-white rounded-2xl shadow-lg text-center">
       <h2 className="text-2xl font-bold text-blue-800 mb-4">แบบทดสอบที่ 9: การวาดนาฬิกา</h2>
-      <p className="text-lg text-gray-700 mb-6"><strong>คำสั่ง:</strong> โปรดปรับเข็มนาฬิกาให้แสดงเวลา <strong>&quot;สิบโมงสิบนาที&quot; (10:10)</strong></p>
+      <p className="text-lg text-gray-700 mb-6"><strong>คำสั่ง:</strong> โปรดปรับเข็มนาฬิกาให้แสดงเวลา <strong>&quot;{targetTime.text}&quot;</strong></p>
 
       <div ref={clockRef} className="relative w-[400px] h-[400px] mx-auto bg-contain bg-no-repeat bg-center" style={{ backgroundImage: `url(${clockImage.src})` }}>
         {/* Hour Hand */}
@@ -97,7 +103,7 @@ const ClockDrawingTask9 = () => {
           // FIX 1: ลบ class ที่เกี่ยวกับ transform ออก
           className="absolute top-1/2 left-1/2 w-2 h-[25%] origin-bottom cursor-pointer group"
           style={{ transform: `translateX(-50%) translateY(-100%) rotate(${hourAngle}deg)` }}
-          onMouseDown={() => setDragging('hour')}
+          onMouseDown={() => { setDragging('hour'); setHasInteracted(true); }}
         >
           <div className="w-full h-full bg-black rounded-t-full" />
           {/* Hitbox area */}
@@ -109,7 +115,7 @@ const ClockDrawingTask9 = () => {
           // ✅ FIX 1: ลบ class ที่เกี่ยวกับ transform ออก
           className="absolute top-1/2 left-1/2 w-1.5 h-[40%] origin-bottom cursor-pointer group"
           style={{ transform: `translateX(-50%) translateY(-100%) rotate(${minuteAngle}deg)` }}
-          onMouseDown={() => setDragging('minute')}
+          onMouseDown={() => { setDragging('minute'); setHasInteracted(true); }}
         >
           <div className="w-full h-full bg-black rounded-t-full" />
           {/* Hitbox area */}
@@ -124,8 +130,9 @@ const ClockDrawingTask9 = () => {
         <p className="text-2xl font-bold text-blue-700">เวลาที่ตั้ง: {String(time.hour).padStart(2, '0')}:{String(time.minute).padStart(2, '0')}</p>
       </div>
 
-      <div className="mt-8 flex justify-center">
-        <button onClick={handleSubmit} className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors">ส่งคำตอบ</button>
+      <div className="mt-8 flex justify-center gap-4">
+        <button onClick={handleReset} className="px-8 py-3 bg-gray-300 text-black font-semibold rounded-lg shadow-md hover:bg-gray-400 transition-colors">ตั้งค่าใหม่</button>
+        <button onClick={handleSubmit} disabled={!hasInteracted} className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed">ส่งคำตอบ</button>
       </div>
     </div>
   );

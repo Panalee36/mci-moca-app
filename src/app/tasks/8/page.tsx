@@ -8,10 +8,7 @@ import { TaskNavigation } from '../../components/TaskNavigation';
 
 // 2. สร้าง Array ของพยัญชนะไทยสำหรับใช้ในการสุ่มโจทย์
 const CONSONANTS = [
-  'ก', 'ข', 'ฃ', 'ค', 'ฅ', 'ฆ', 'ง', 'จ', 'ฉ', 'ช', 'ซ', 'ฌ', 'ญ',
-  'ฎ', 'ฏ', 'ฐ', 'ฑ', 'ฒ', 'ณ', 'ด', 'ต', 'ถ', 'ท', 'ธ', 'น', 'บ',
-  'ป', 'ผ', 'ฝ', 'พ', 'ฟ', 'ภ', 'ม', 'ย', 'ร', 'ล', 'ว', 'ศ', 'ษ',
-  'ส', 'ห', 'ฬ', 'อ', 'ฮ'
+  'ก', 'น',  'ค','ร','ม','ต','บ','ค','ป','ท','จ','ห','ส'
 ];
 
 const LanguageTask8 = () => {
@@ -23,17 +20,15 @@ const LanguageTask8 = () => {
   const [isStarted, setIsStarted] = useState(false);
   const [timeLeft, setTimeLeft] = useState(60);
   const [text, setText] = useState('');
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
   const [score, setScore] = useState<number | null>(null);
   const [correctWordCount, setCorrectWordCount] = useState(0);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // 4. สร้าง Set ของคำศัพท์จากไฟล์ JSON เพื่อการค้นหาที่รวดเร็ว
   // useMemo จะช่วยให้การสร้าง Set นี้ทำงานเพียงครั้งเดียว แม้ component จะ re-render ก็ตาม
   const dictionarySet = useMemo(() => new Set(fullWordList), []);
 
-  const checkAnswers = useCallback(() => {
-    if (score !== null) return;
-
+  const checkAnswers = () => {
     if (timerRef.current) clearTimeout(timerRef.current);
 
     const userWords = text.split(/[\s\n]+/).filter(word => word.trim().length > 0);
@@ -41,14 +36,14 @@ const LanguageTask8 = () => {
     const validWords = userWords.filter(word =>
       word.startsWith(targetLetter) && dictionarySet.has(word)
     );
-    
+
     const uniqueValidWordsCount = new Set(validWords).size;
     setCorrectWordCount(uniqueValidWordsCount);
 
     const finalScore = uniqueValidWordsCount >= 11 ? 1 : 0;
     setScore(finalScore);
     updateScore(8, finalScore);
-  }, [score, text, targetLetter, dictionarySet, updateScore]);
+  };
 
   // 5. สุ่มตัวอักษรโจทย์เมื่อคอมโพเนนต์โหลดขึ้นมาครั้งแรก
   useEffect(() => {
@@ -56,19 +51,31 @@ const LanguageTask8 = () => {
     setTargetLetter(randomLetter);
   }, []); // [] หมายถึงให้ Effect นี้ทำงานแค่ครั้งเดียวตอน Mount
 
+  // Timer effect
   useEffect(() => {
-    if (isStarted && timeLeft > 0) {
-      timerRef.current = setTimeout(() => {
-        setTimeLeft(timeLeft - 1);
+    if (isStarted) {
+      timerRef.current = setInterval(() => {
+        setTimeLeft(prevTime => {
+          if (prevTime <= 1) {
+            clearInterval(timerRef.current!);
+            return 0;
+          }
+          return prevTime - 1;
+        });
       }, 1000);
-    } else if (timeLeft === 0) {
-      if(timerRef.current) clearTimeout(timerRef.current);
-      checkAnswers();
     }
     return () => {
-      if(timerRef.current) clearTimeout(timerRef.current);
+      if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [isStarted, timeLeft, checkAnswers]);
+  }, [isStarted]);
+
+  // Answer checking effect
+  useEffect(() => {
+    if (timeLeft === 0 && isStarted && score === null) {
+      checkAnswers();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeLeft, isStarted, score]);
 
   const startTest = () => {
     setIsStarted(true);
@@ -101,12 +108,7 @@ const LanguageTask8 = () => {
             placeholder={`พิมพ์คำที่ขึ้นต้นด้วย "${targetLetter}" ที่นี่...`}
             disabled={timeLeft === 0}
           />
-          <button  
-            onClick={checkAnswers}  
-            className="mt-6 px-8 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition-colors"
-          >
-            ตรวจคำตอบ
-          </button>
+
         </div>
       ) : (
         <div className="mt-6 flex flex-col items-center gap-6">
@@ -115,7 +117,7 @@ const LanguageTask8 = () => {
             <p>คุณตอบคำที่ถูกต้องและไม่ซ้ำกันได้ {correctWordCount} คำ</p>
             <p>โปรดกดปุ่ม &quot;ถัดไป&quot; เพื่อทำแบบทดสอบข้อต่อไป</p>
           </div>
-          <TaskNavigation />
+          <TaskNavigation showBackButton={false} />
         </div>
       )}
     </div>

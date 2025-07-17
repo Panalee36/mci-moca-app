@@ -78,7 +78,7 @@ const SentenceRepetitionTask10 = () => {
             <p className="font-bold">การทดสอบสิ้นสุดแล้ว</p>
             <p>โปรดกดปุ่ม &quot;ถัดไป&quot; เพื่อทำแบบทดสอบข้อต่อไป</p>
           </div>
-          <TaskNavigation />
+          <TaskNavigation showBackButton={false} />
         </div>
       );
     }

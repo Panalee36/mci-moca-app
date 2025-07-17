@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 // 1. นำเข้า List คำศัพท์ทั้งหมดจากไฟล์ JSON
 import fullWordList from './thai-wordlist.json'; 
 import { useTest } from '../../context/TestContext';

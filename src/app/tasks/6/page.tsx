@@ -31,7 +31,7 @@ const AttentionTask6 = () => {
   const [hits, setHits] = useState(0); // Correct taps on '1'
   const [errors, setErrors] = useState(0); // Incorrect taps on non-'1' numbers
   const [isFinished, setIsFinished] = useState(false);
-  const [score, setScore] = useState<number | null>(null);
+
   const tappedForCurrentIndex = useRef(false);
 
   // useRef สำหรับเก็บ timer เพื่อให้เราสามารถเคลียร์มันได้จากที่อื่น
@@ -87,7 +87,6 @@ const AttentionTask6 = () => {
   useEffect(() => {
     if (isFinished) {
       const finalScore = calculateScore();
-      setScore(finalScore);
       updateScore(6, finalScore);
       console.log("Test finished!");
       console.log(`Final Score: ${finalScore}`);

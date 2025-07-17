@@ -182,7 +182,7 @@ const VisuospatialTask1 = () => {
     // The correctPath still refers to the original conceptual order of labels (indices)
     // as the relative positions are maintained by the offset.
     const correctPath = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-    let isCorrect = userPath.length === correctPath.length &&
+    const isCorrect = userPath.length === correctPath.length &&
       userPath.every((val, index) => val === correctPath[index]);
     const newScore = isCorrect ? 1 : 0;
     setScore(newScore);

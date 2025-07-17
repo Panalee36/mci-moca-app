@@ -23,7 +23,7 @@ const LINE_WIDTH = 4;
 const DrawingTask3 = () => {
     const { updateScore } = useTest();
     const [phase, setPhase] = useState<'viewing' | 'drawing' | 'finished'>('viewing');
-    const [score, setScore] = useState<number | null>(null);
+
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     const [dots, setDots] = useState<Array<{ x: number; y: number }>>([]);
@@ -162,7 +162,6 @@ const DrawingTask3 = () => {
         // ตรวจสอบว่ามีเส้นวาดอย่างน้อย 1 เส้นหรือไม่
         const newScore = drawnLines.length > 0 ? 1 : 0; // ถ้ามีเส้นวาด จะได้ 1 คะแนน มิฉะนั้นจะได้ 0
 
-        setScore(newScore);
         updateScore(3, newScore); 
         setPhase('finished');
     }, [drawnLines, updateScore]); // drawnLines เป็น dependency เพื่อให้โค้ดทำงานถูกต้อง

@@ -74,7 +74,7 @@ const SentenceRepetitionTask10 = () => {
     if (isFinished) {
       return (
         <div className="text-center flex flex-col items-center gap-6">
-          <div className="p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded-lg w-full max-w-md text-center">
+          <div className="p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded-lg w-full max-w-md text-center dark:bg-green-900/50 dark:border-green-400 dark:text-green-200">
             <p className="font-bold">การทดสอบสิ้นสุดแล้ว</p>
             <p>โปรดกดปุ่ม &quot;ถัดไป&quot; เพื่อทำแบบทดสอบข้อต่อไป</p>
           </div>
@@ -88,24 +88,24 @@ const SentenceRepetitionTask10 = () => {
     if (phase === 'memorize') {
       return (
         <div className="text-center">
-          <p className="text-lg text-gray-700 mb-4"><strong>คำสั่ง:</strong> โปรดจดจำประโยคต่อไปนี้ภายใน 15 วินาที</p>
-          <div className="p-6 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-2xl font-semibold text-gray-800">{currentTask.sentence}</p>
+          <p className="text-lg text-gray-700 dark:text-gray-300 mb-4"><strong>คำสั่ง:</strong> โปรดจดจำประโยคต่อไปนี้ภายใน 15 วินาที</p>
+          <div className="p-6 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-500 rounded-lg">
+            <p className="text-2xl font-semibold text-gray-800 dark:text-gray-100">{currentTask.sentence}</p>
           </div>
-          <p className="text-xl font-bold text-red-600 mt-6">เหลือเวลาอีก: {timeLeft} วินาที</p>
+          <p className="text-xl font-bold text-red-600 dark:text-red-400 mt-6">เหลือเวลาอีก: {timeLeft} วินาที</p>
         </div>
       );
     }
 
     return (
       <div className="text-center">
-        <p className="text-lg text-gray-700 mb-6"><strong>คำสั่ง:</strong> โปรดเลือกประโยคที่ท่านได้เห็นก่อนหน้านี้</p>
+        <p className="text-lg text-gray-700 dark:text-gray-300 mb-6"><strong>คำสั่ง:</strong> โปรดเลือกประโยคที่ท่านได้เห็นก่อนหน้านี้</p>
         <div className="grid grid-cols-1 gap-4">
           {currentTask.options.map(option => (
             <button
               key={option}
               onClick={() => handleAnswer(option)}
-              className="w-full px-4 py-4 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors text-lg text-left"
+              className="w-full px-4 py-4 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors text-lg text-left dark:bg-blue-700 dark:hover:bg-blue-600"
             >
               {option}
             </button>
@@ -116,8 +116,8 @@ const SentenceRepetitionTask10 = () => {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto p-8 bg-white rounded-2xl shadow-lg">
-      <h2 className="text-2xl font-bold text-center text-blue-800 mb-4">แบบทดสอบที่ 10: ภาษา - การจำประโยค</h2>
+    <div className="w-full max-w-2xl mx-auto p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg">
+      <h2 className="text-2xl font-bold text-center text-blue-800 dark:text-blue-300 mb-4">แบบทดสอบที่ 10: ภาษา - การจำประโยค</h2>
       {renderContent()}
     </div>
   );

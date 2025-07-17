@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTest } from '../../context/TestContext';
 import { TaskNavigation } from '../../components/TaskNavigation';
 
@@ -26,7 +26,7 @@ const numberSequence = generateSequence();
 const totalOnes = 3; // We have exactly 3 ones in the sequence.
 
 const AttentionTask6 = () => {
-  const { updateScore } = useTest();
+  const { updateScore, goToNextTask } = useTest();
   const [index, setIndex] = useState(0);
   const [hits, setHits] = useState(0); // Correct taps on '1'
   const [errors, setErrors] = useState(0); // Incorrect taps on non-'1' numbers
@@ -37,64 +37,83 @@ const AttentionTask6 = () => {
   // useRef สำหรับเก็บ timer เพื่อให้เราสามารถเคลียร์มันได้จากที่อื่น
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // This useEffect handles the timer for the number sequence.
   useEffect(() => {
-    // ตราบใดที่ยังไม่จบการทดสอบและยังไม่แสดงครบทุกตัว
-    if (index < numberSequence.length && !isFinished) {
-      timerRef.current = setTimeout(() => {
-        // Move to the next number
-        setIndex(prev => prev + 1);
-        tappedForCurrentIndex.current = false; // Reset tap status for the new number
-      }, 2000); // Display each number for 1 second (1000 ms)
-
-      return () => {
-        if (timerRef.current) {
-          clearTimeout(timerRef.current);
-        }
-      };
-    } else if (index >= numberSequence.length && !isFinished) {
-      // The sequence is over, finish the test.
-      setIsFinished(true);
+    // Stop the timer if the test is finished or the sequence is complete.
+    if (isFinished || index >= numberSequence.length) {
+      return;
     }
-  }, [index, isFinished]); // เพิ่ม isFinished ใน dependency array
 
-  const handleTap = () => {
-    // ป้องกันการแตะหลายครั้งสำหรับตัวเลขเดียวกัน
-    if (tappedForCurrentIndex.current || isFinished) {
-        console.log("Already tapped for this number or test finished.");
-        return;
-    } 
+    // Set a timer to advance to the next number.
+    timerRef.current = setTimeout(() => {
+      setIndex(prev => prev + 1);
+      tappedForCurrentIndex.current = false; // Reset for the new number.
+    }, 2000);
 
-    const currentNumber = numberSequence[index];
+    // Cleanup function to clear the timer.
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, [index, isFinished]);
 
-    if (currentNumber === 1) {
-      setHits(prev => prev + 1);
-      console.log(`Hit! Correctly tapped on 1. Total hits: ${hits + 1}`);
-    } else {
-      setErrors(prev => prev + 1);
-      console.log(`Error! Tapped on ${currentNumber}. Total errors: ${errors + 1}`);
-    }
-    tappedForCurrentIndex.current = true; // ตั้งค่าว่ามีการแตะแล้วสำหรับตัวเลขปัจจุบัน
-  };
-
-  const calculateScore = () => {
-    // ให้ 1 คะแนนถ้าตอบถูกทั้งหมด (hits = 3) และไม่มีข้อผิดพลาด (errors = 0)
-    if (hits === totalOnes && errors === 0) {
-      return 1;
-    }
-    return 0;
-  };
-
+  // This useEffect handles the logic for when the test ends.
   useEffect(() => {
-    if (isFinished) {
+    const testShouldEnd = index >= numberSequence.length;
+
+    if (isFinished || testShouldEnd) {
+      // Ensure isFinished is set if the sequence ends.
+      if (testShouldEnd && !isFinished) {
+        setIsFinished(true);
+        return; // Allow re-render to trigger the final logic.
+      }
+
+      // Clear any lingering timer when the test is officially over.
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+
       const finalScore = calculateScore();
       updateScore(6, finalScore);
       console.log("Test finished!");
       console.log(`Final Score: ${finalScore}`);
       console.log(`Correct Hits: ${hits}`);
       console.log(`Errors (taps on non-1): ${errors}`);
+
+      // Navigate after a short delay.
+      setTimeout(() => {
+        goToNextTask();
+      }, 1500);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isFinished]);
+  }, [isFinished, index, hits, errors, updateScore, goToNextTask]);
+
+  const handleTap = useCallback(() => {
+    if (tappedForCurrentIndex.current || isFinished) {
+      return;
+    }
+    tappedForCurrentIndex.current = true;
+
+    const currentNumber = numberSequence[index];
+
+    if (currentNumber === 1) {
+      setHits(prev => prev + 1);
+      // End the task on the first correct tap.
+      setIsFinished(true);
+    } else {
+      setErrors(prev => prev + 1);
+    }
+  }, [isFinished, index]);
+
+  const calculateScore = () => {
+    // Give 1 point if the first tap is correct (hits = 1) and there are no errors.
+    if (hits === 1 && errors === 0) {
+      return 1;
+    }
+    return 0;
+  };
+
+
 
   return (
     <div className="w-full max-w-2xl mx-auto p-8 bg-white rounded-2xl shadow-lg text-center">
@@ -117,9 +136,8 @@ const AttentionTask6 = () => {
         <div className="flex flex-col items-center gap-6">
           <div className="p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded-lg w-full max-w-md text-center">
             <p className="font-bold">การทดสอบสิ้นสุดแล้ว</p>
-            <p>โปรดกดปุ่ม &quot;ถัดไป&quot; เพื่อทำแบบทดสอบข้อต่อไป</p>
+            <p>กำลังไปข้อต่อไป...</p>
           </div>
-          <TaskNavigation showBackButton={false} />
         </div>
       )}
     </div>

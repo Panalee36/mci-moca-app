@@ -32,7 +32,6 @@ const MemoryTask4 = () => {
           <TaskNavigation
             onNext={() => setAcknowledged(true)}
             nextDisabled={acknowledged}
-            showBackButton={false}
           />
         </div>
       </div>

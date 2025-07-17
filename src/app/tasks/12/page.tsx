@@ -75,7 +75,7 @@ const DelayedRecallTask12 = () => {
       ) : (
         <div className="flex flex-col items-center gap-4 sm:gap-6 mt-6 sm:mt-8">
           <p className="text-base sm:text-lg lg:text-xl font-semibold text-green-700 dark:text-green-400">คำตอบของคุณถูกบันทึกเรียบร้อยแล้ว</p>
-          <TaskNavigation showBackButton={false} />
+          <TaskNavigation />
         </div>
       )}
     </div>

@@ -217,7 +217,7 @@ const VisuospatialTask1 = () => {
           </div>
         )}
 
-        <TaskNavigation nextDisabled={score === null} showBackButton={false} />
+        <TaskNavigation nextDisabled={score === null} />
       </div>
     </div>
   );

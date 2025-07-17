@@ -110,7 +110,7 @@ const SubtractionTask7 = () => {
               <p className="font-bold text-base sm:text-lg">บันทึกคำตอบเรียบร้อย</p>
               <p className="text-sm sm:text-base">กดปุ่ม &quot;ถัดไป&quot; เพื่อทำแบบทดสอบข้อต่อไปได้เลย</p>
             </div>
-            <TaskNavigation showBackButton={false} />
+            <TaskNavigation />
           </div>
         )}
       </div>

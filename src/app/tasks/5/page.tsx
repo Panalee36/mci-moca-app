@@ -87,7 +87,7 @@ const AttentionTask5 = () => {
             <p className="font-bold">บันทึกคำตอบเรียบร้อย</p>
             <p>โปรดกดปุ่ม &quot;ถัดไป&quot; เพื่อทำแบบทดสอบข้อต่อไป</p>
           </div>
-          <TaskNavigation showBackButton={false} />
+          <TaskNavigation />
         </div>
       )}
     </div>

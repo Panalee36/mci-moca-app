@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useTest } from '../../context/TestContext';
 import { TaskNavigation } from '../../components/TaskNavigation';
 import Image from 'next/image';

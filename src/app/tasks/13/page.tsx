@@ -131,7 +131,7 @@ const OrientationTask13 = () => {
       </div>
 
       <div className="mt-8 flex flex-col items-center gap-6">
-        <TaskNavigation onFinish={() => updateScore(13, calculateScore())} nextDisabled={!isCompleted} showBackButton={false} />
+        <TaskNavigation onFinish={() => updateScore(13, calculateScore())} nextDisabled={!isCompleted} />
       </div>
     </div>
   );

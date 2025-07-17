@@ -115,7 +115,7 @@ const LanguageTask8 = () => {
             <p>คุณตอบคำที่ถูกต้องและไม่ซ้ำกันได้ {correctWordCount} คำ</p>
             <p>โปรดกดปุ่ม &quot;ถัดไป&quot; เพื่อทำแบบทดสอบข้อต่อไป</p>
           </div>
-          <TaskNavigation onFinish={() => {}} nextDisabled={score === null} showBackButton={false} />
+          <TaskNavigation onFinish={() => {}} nextDisabled={score === null} />
         </div>
       )}
     </div>

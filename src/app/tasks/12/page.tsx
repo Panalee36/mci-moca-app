@@ -43,8 +43,7 @@ const DelayedRecallTask12 = () => {
 
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 p-4">
-      <div className="text-center max-w-3xl mx-auto p-4 sm:p-6 lg:p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg">
+    <div className="w-full max-w-3xl mx-auto p-4 sm:p-6 lg:p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg">
         <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-4 text-gray-900 dark:text-gray-100">แบบทดสอบที่ 12: จดจำคำศัพท์</h1>
         <p className="text-sm sm:text-base lg:text-lg mb-4 sm:mb-6 px-2 text-gray-700 dark:text-gray-300">โปรดเลือกคำที่คุณจดจำได้จากรายการก่อนหน้านี้</p>
 
@@ -56,7 +55,7 @@ const DelayedRecallTask12 = () => {
               disabled={isSubmitted}
               className={`p-3 sm:p-4 rounded-lg font-semibold text-sm sm:text-base lg:text-lg transition-colors duration-200 ${selectedWords.includes(word)
                   ? 'bg-blue-600 text-white shadow-md dark:bg-blue-500 dark:hover:bg-blue-400'
-                  : 'bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'
+                  : 'bg-gray-200 hover:bg-gray-300 dark:bg-gray-700/60 dark:text-gray-200 dark:hover:bg-gray-600/60'
                 } ${isSubmitted ? 'opacity-70 cursor-not-allowed' : ''}`}>
               {word}
             </button>
@@ -77,7 +76,6 @@ const DelayedRecallTask12 = () => {
             <TaskNavigation showBackButton={false} />
           </div>
         )}
-      </div>
     </div>
   );
 };

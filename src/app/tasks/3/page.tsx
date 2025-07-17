@@ -1,266 +1,192 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { useTheme } from 'next-themes';
+import { useState, useEffect, useCallback } from 'react';
 import { useTest } from '../../context/TestContext';
 import { TaskNavigation } from '../../components/TaskNavigation';
 import Image from 'next/image';
 import square2dImage from '../../img/drawing/square.jpg';
 
-// --- ค่าคงที่สำหรับ Dot Game ---
+interface Point {
+  id: number;
+  x: number;
+  y: number;
+}
+
 const GRID_SIZE = 10;
-const DOT_SPACING = 40;
-const CANVAS_OFFSET = 50;
 
-// ค่าที่ปรับปรุงสำหรับผู้สูงอายุ: จุดใหญ่ขึ้น, คลิกง่ายขึ้น, เส้นหนาขึ้น
-const DOT_RADIUS = 10;
-const ACTIVE_DOT_RADIUS = 12;
-const DOT_DETECTION_RADIUS = 30;
-const LINE_WIDTH = 4;
+// Generate points for the grid
+const generateGridPoints = (): Point[] => {
+  const points: Point[] = [];
+  let id = 0;
+  const step = 100 / (GRID_SIZE + 1);
+  for (let i = 1; i <= GRID_SIZE; i++) {
+    for (let j = 1; j <= GRID_SIZE; j++) {
+      points.push({ id: id++, x: j * step, y: i * step });
+    }
+  }
+  return points;
+};
 
-// ไม่จำเป็นต้องใช้ CORRECT_SHAPE_LINES อีกต่อไปในเวอร์ชันนี้
-// เพราะเราจะไม่เปรียบเทียบรูปทรงที่ถูกต้องแล้ว
+const GRID_POINTS = generateGridPoints();
 
 const DrawingTask3 = () => {
-    const { theme } = useTheme();
-    const { updateScore } = useTest();
-    const [phase, setPhase] = useState<'viewing' | 'drawing' | 'finished'>('viewing');
+  const { updateScore } = useTest();
+  const [phase, setPhase] = useState<'viewing' | 'drawing' | 'finished'>('viewing');
+  const [selectedPoint, setSelectedPoint] = useState<number | null>(null);
+  const [connections, setConnections] = useState<Array<{ from: number, to: number }>>([]);
 
-    const canvasRef = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    if (phase === 'viewing') {
+      const timer = setTimeout(() => setPhase('drawing'), 15000);
+      return () => clearTimeout(timer);
+    }
+  }, [phase]);
 
-    const [dots, setDots] = useState<Array<{ x: number; y: number }>>([]);
-    const [drawnLines, setDrawnLines] = useState<Array<{ from: number; to: number }>>([]);
-    const [activeDotIndex, setActiveDotIndex] = useState<number | null>(null);
+  const handlePointClick = (pointId: number) => {
+    if (phase !== 'drawing') return;
 
-    useEffect(() => {
-        const generatedDots = [];
-        for (let row = 0; row < GRID_SIZE; row++) {
-            for (let col = 0; col < GRID_SIZE; col++) {
-                generatedDots.push({
-                    x: col * DOT_SPACING + CANVAS_OFFSET,
-                    y: row * DOT_SPACING + CANVAS_OFFSET
-                });
-            }
-        }
-        setDots(generatedDots);
-    }, []);
+    if (selectedPoint === null) {
+      setSelectedPoint(pointId);
+    } else if (selectedPoint === pointId) {
+      setSelectedPoint(null);
+    } else {
+      const newConnection = { from: selectedPoint, to: pointId };
+      // Avoid duplicate connections
+      const isDuplicate = connections.some(
+        conn => (conn.from === newConnection.from && conn.to === newConnection.to) || (conn.from === newConnection.to && conn.to === newConnection.from)
+      );
+      if (!isDuplicate) {
+        setConnections(prev => [...prev, newConnection]);
+      }
+      setSelectedPoint(null);
+    }
+  };
 
-    useEffect(() => {
-        if (phase === 'viewing') {
-            const timer = setTimeout(() => setPhase('drawing'), 15000);
-            return () => clearTimeout(timer);
-        }
-    }, [phase]);
+  const getPointStatus = (pointId: number) => {
+    if (selectedPoint === pointId) return 'selected';
+    const isConnected = connections.some(conn => conn.from === pointId || conn.to === pointId);
+    if (isConnected) return 'connected';
+    return 'default';
+  };
 
-    const getMousePos = useCallback((canvas: HTMLCanvasElement, evt: MouseEvent | React.MouseEvent) => {
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-        return {
-            x: (evt.clientX - rect.left) * scaleX,
-            y: (evt.clientY - rect.top) * scaleY,
-        };
-    }, []);
+  const getPointClasses = (pointId: number) => {
+    const status = getPointStatus(pointId);
+    const baseClasses = 'w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 cursor-pointer transition-all duration-200 hover:scale-125';
 
-    const getTouchPos = useCallback((canvas: HTMLCanvasElement, evt: TouchEvent | React.TouchEvent) => {
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-        const touch = evt.touches[0] || evt.changedTouches[0];
-        return {
-            x: (touch.clientX - rect.left) * scaleX,
-            y: (touch.clientY - rect.top) * scaleY,
-        };
-    }, []);
+    switch (status) {
+      case 'selected':
+        return `${baseClasses} bg-yellow-400 border-yellow-600 ring-2 ring-yellow-300 dark:bg-yellow-500 dark:border-yellow-700 dark:ring-yellow-400`;
+      case 'connected':
+        return `${baseClasses} bg-blue-500 border-blue-600 dark:bg-blue-600 dark:border-blue-700`;
+      default:
+        return `${baseClasses} bg-gray-200 border-gray-400 hover:bg-gray-300 dark:bg-gray-700 dark:border-gray-500 dark:hover:bg-gray-600`;
+    }
+  };
 
-    const getNearestDotIndex = useCallback((x: number, y: number) => {
-        let nearestDotIndex: number | null = null;
-        let minDistance = Infinity;
+  const resetDrawing = () => {
+    setConnections([]);
+    setSelectedPoint(null);
+  };
 
-        dots.forEach((dot, index) => {
-            const dist = Math.sqrt(Math.pow(x - dot.x, 2) + Math.pow(y - dot.y, 2));
-            if (dist < minDistance && dist < DOT_DETECTION_RADIUS) {
-                minDistance = dist;
-                nearestDotIndex = index;
-            }
-        });
-        return nearestDotIndex;
-    }, [dots]);
+  const submitDrawing = () => {
+    // Scoring is based on whether the user drew anything
+    const newScore = connections.length > 0 ? 1 : 0;
+    updateScore(3, newScore);
+    setPhase('finished');
+  };
 
-    const drawLine = useCallback((x1: number, y1: number, x2: number, y2: number, color: string = '#333', lineWidth: number = LINE_WIDTH) => {
-        const canvas = canvasRef.current;
-        const ctx = canvas?.getContext('2d');
-        if (!ctx) return;
-        ctx.beginPath();
-        ctx.strokeStyle = color;
-        ctx.lineWidth = lineWidth;
-        ctx.lineCap = 'round';
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
-    }, []);
+  return (
+    <div className="w-full max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg">
+      <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-center text-blue-800 dark:text-blue-300 mb-4">แบบทดสอบที่ 3: การวาดรูป</h2>
 
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-
-        const isDarkMode = theme === 'dark';
-        const dotColor = isDarkMode ? '#6B7280' : '#999';
-        const activeDotColor = isDarkMode ? '#60A5FA' : 'blue';
-        const lineColor = isDarkMode ? '#E5E7EB' : '#333';
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        if (phase === 'drawing') {
-            dots.forEach((dot, index) => {
-                ctx.beginPath();
-                ctx.arc(dot.x, dot.y, DOT_RADIUS, 0, Math.PI * 2);
-                ctx.fillStyle = dotColor;
-                ctx.fill();
-
-                if (activeDotIndex === index) {
-                    ctx.beginPath();
-                    ctx.arc(dot.x, dot.y, ACTIVE_DOT_RADIUS, 0, Math.PI * 2);
-                    ctx.fillStyle = activeDotColor;
-                    ctx.fill();
-                }
-            });
-
-            drawnLines.forEach(line => {
-                const fromDot = dots[line.from];
-                const toDot = dots[line.to];
-                if (fromDot && toDot) {
-                    drawLine(fromDot.x, fromDot.y, toDot.x, toDot.y, lineColor);
-                }
-            });
-        }
-    }, [phase, dots, drawnLines, activeDotIndex, drawLine, theme]);
-
-    const handleInteraction = useCallback((pos: { x: number, y: number }) => {
-        if (phase !== 'drawing') return;
-
-        const clickedDotIndex = getNearestDotIndex(pos.x, pos.y);
-
-        if (clickedDotIndex !== null) {
-            if (activeDotIndex === null) {
-                setActiveDotIndex(clickedDotIndex);
-            } else {
-                const newLine = { from: activeDotIndex, to: clickedDotIndex };
-
-                const isDuplicate = drawnLines.some(line =>
-                    (line.from === newLine.from && line.to === newLine.to) ||
-                    (line.from === newLine.to && line.to === newLine.from)
-                );
-
-                if (!isDuplicate && newLine.from !== newLine.to) {
-                    setDrawnLines(prevLines => [...prevLines, newLine]);
-                }
-                setActiveDotIndex(null);
-            }
-        } else {
-            setActiveDotIndex(null);
-        }
-    }, [getNearestDotIndex, activeDotIndex, drawnLines, phase]);
-
-    const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-        if (e.button !== 0) return;
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-
-        const pos = getMousePos(canvas, e);
-        handleInteraction(pos);
-    }, [getMousePos, handleInteraction]);
-
-    const handleTouchStart = useCallback((e: React.TouchEvent<HTMLCanvasElement>) => {
-        e.preventDefault();
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-
-        const pos = getTouchPos(canvas, e);
-        handleInteraction(pos);
-    }, [getTouchPos, handleInteraction]);
-
-    const clearCanvas = useCallback(() => {
-        setDrawnLines([]);
-        setActiveDotIndex(null);
-        const canvas = canvasRef.current;
-        const ctx = canvas?.getContext('2d');
-        if (ctx) {
-            ctx.clearRect(0, 0, canvas!.width, canvas!.height);
-        }
-    }, []);
-
-    const submitDrawing = useCallback(() => {
-        const newScore = drawnLines.length > 0 ? 1 : 0;
-        updateScore(3, newScore);
-        setPhase('finished');
-    }, [drawnLines, updateScore]);
-
-    return (
-        <div className="w-full max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg">
-            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-center text-blue-800 dark:text-blue-300 mb-4">แบบทดสอบที่ 3: การวาดรูป</h2>
-            <p className="text-sm sm:text-base lg:text-lg text-center text-gray-700 dark:text-gray-300 mb-4 sm:mb-6 px-2"><strong>คำสั่ง:</strong> ดูรูปต่อไปนี้ให้ดี แล้วจำไว้ เพื่อที่จะวาดตามในขั้นตอนต่อไป</p>
-            {phase === 'viewing' && (
-                <div className="text-center">
-                    <p className="text-sm sm:text-base lg:text-lg text-gray-700 dark:text-gray-300 mb-4 sm:mb-6"><strong>คำสั่ง:</strong> โปรดจดจำภาพสี่เหลี่ยมนี้ คุณมีเวลา 15 วินาที</p>
-                    <div className="flex justify-center mb-4">
-                        <Image
-                            src={square2dImage}
-                            alt="2D Square Example"
-                            width={400}
-                            height={400}
-                            className="rounded-lg shadow-md max-w-full h-auto w-64 sm:w-80 lg:w-96"
-                        />
-                    </div>
-                    <p className="mt-4 text-xs sm:text-sm text-gray-500 dark:text-gray-400">หน้าจอจะเปลี่ยนโดยอัตโนมัติเมื่อหมดเวลา...</p>
-                </div>
-            )}
-
-            {phase === 'drawing' && (
-                <div className="text-center">
-                    <p className="text-sm sm:text-base lg:text-lg text-gray-700 dark:text-gray-300 mb-4 sm:mb-6"><strong>คำสั่ง:</strong> เริ่มจาดจุดไหนก่อนก็ได้โดยการเชื่อมจุดตามรูปที่เห็นก่อนหน้านี้</p>
-                    <div className="flex justify-center mb-4 sm:mb-6 overflow-x-auto">
-                        <canvas
-                            ref={canvasRef}
-                            width={GRID_SIZE * DOT_SPACING + 2 * CANVAS_OFFSET}
-                            height={GRID_SIZE * DOT_SPACING + 2 * CANVAS_OFFSET}
-                            className="border-2 sm:border-4 border-blue-400 dark:border-blue-600 rounded-lg bg-white dark:bg-gray-700 cursor-crosshair shadow-lg max-w-full h-auto"
-                            style={{ minWidth: '320px', touchAction: 'none' }}
-                            onMouseDown={handleMouseDown}
-                            onTouchStart={handleTouchStart}
-                        />
-                    </div>
-                    <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mt-4">
-                        <button
-                            onClick={clearCanvas}
-                            className="px-4 sm:px-6 py-2 sm:py-3 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300 transition-colors text-sm sm:text-base w-full sm:w-auto dark:bg-gray-600 dark:text-gray-100 dark:hover:bg-gray-500"
-                        >
-                            ล้างทั้งหมด
-                        </button>
-                        <button
-                            onClick={submitDrawing}
-                            disabled={drawnLines.length === 0}
-                            className="px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm sm:text-base w-full sm:w-auto dark:bg-blue-700 dark:hover:bg-blue-600 dark:disabled:bg-gray-500"
-                        >
-                            บันทึกคำตอบ
-                        </button>
-                    </div>
-                </div>
-            )}
-
-            {phase === 'finished' && (
-                <div className="text-center flex flex-col items-center gap-4 sm:gap-6">
-                    <div className="mt-4 sm:mt-6 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded-lg w-full max-w-md dark:bg-green-900/50 dark:border-green-400 dark:text-green-200">
-                        <p className="text-lg sm:text-xl font-bold">บันทึกคำตอบเรียบร้อย</p>
-                        <p className="text-sm sm:text-base">โปรดกดปุ่ม &quot;ถัดไป&quot; เพื่อทำแบบทดสอบข้อต่อไป</p>
-                    </div>
-                    <TaskNavigation showBackButton={false} />
-                </div>
-            )}
+      {phase === 'viewing' && (
+        <div className="text-center">
+          <p className="text-sm sm:text-base lg:text-lg text-gray-700 dark:text-gray-300 mb-4 sm:mb-6"><strong>คำสั่ง:</strong> โปรดจดจำภาพลูกบาศก์นี้ คุณมีเวลา 15 วินาที</p>
+          <div className="flex justify-center mb-4">
+            <Image
+              src={square2dImage}
+              alt="2D Cube Example"
+              width={400}
+              height={400}
+              className="rounded-lg shadow-md max-w-full h-auto w-64 sm:w-80 lg:w-96"
+            />
+          </div>
+          <p className="mt-4 text-xs sm:text-sm text-gray-500 dark:text-gray-400">หน้าจอจะเปลี่ยนโดยอัตโนมัติเมื่อหมดเวลา...</p>
         </div>
-    );
+      )}
+
+      {phase === 'drawing' && (
+        <div className="text-center">
+          <p className="text-sm sm:text-base lg:text-lg text-gray-700 dark:text-gray-300 mb-4 sm:mb-6"><strong>คำสั่ง:</strong> โปรดวาดรูปตามที่เห็นก่อนหน้านี้ โดยการเชื่อมจุด</p>
+          
+          <div className="flex justify-center mb-4 sm:mb-6">
+            <div className="relative w-full max-w-md h-80 sm:h-96 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900/50 overflow-hidden">
+              {GRID_POINTS.map((point) => (
+                <button
+                  key={point.id}
+                  onClick={() => handlePointClick(point.id)}
+                  className={getPointClasses(point.id)}
+                  style={{
+                    position: 'absolute',
+                    left: `${point.x}%`,
+                    top: `${point.y}%`,
+                    transform: 'translate(-50%, -50%)'
+                  }}
+                />
+              ))}
+
+              <svg className="absolute inset-0 w-full h-full pointer-events-none">
+                {connections.map((conn, index) => {
+                  const fromPoint = GRID_POINTS.find(p => p.id === conn.from);
+                  const toPoint = GRID_POINTS.find(p => p.id === conn.to);
+                  if (!fromPoint || !toPoint) return null;
+
+                  return (
+                    <line
+                      key={index}
+                      x1={`${fromPoint.x}%`}
+                      y1={`${fromPoint.y}%`}
+                      x2={`${toPoint.x}%`}
+                      y2={`${toPoint.y}%`}
+                      className="stroke-blue-500 dark:stroke-blue-400"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                    />
+                  );
+                })}
+              </svg>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mt-4">
+            <button
+              onClick={resetDrawing}
+              className="px-4 sm:px-6 py-2 sm:py-3 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300 transition-colors text-sm sm:text-base w-full sm:w-auto dark:bg-gray-600 dark:text-gray-100 dark:hover:bg-gray-500"
+            >
+              ล้างทั้งหมด
+            </button>
+            <button
+              onClick={submitDrawing}
+              disabled={connections.length === 0}
+              className="px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm sm:text-base w-full sm:w-auto dark:bg-blue-700 dark:hover:bg-blue-600 dark:disabled:bg-gray-500"
+            >
+              บันทึกคำตอบ
+            </button>
+          </div>
+        </div>
+      )}
+
+      {phase === 'finished' && (
+        <div className="text-center flex flex-col items-center gap-4 sm:gap-6">
+          <div className="mt-4 sm:mt-6 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded-lg w-full max-w-md dark:bg-green-900/50 dark:border-green-400 dark:text-green-200">
+            <p className="text-lg sm:text-xl font-bold">บันทึกคำตอบเรียบร้อย</p>
+            <p className="text-sm sm:text-base">โปรดกดปุ่ม &quot;ถัดไป&quot; เพื่อทำแบบทดสอบข้อต่อไป</p>
+          </div>
+          <TaskNavigation showBackButton={false} />
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default DrawingTask3;

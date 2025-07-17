@@ -4,6 +4,7 @@ import { useTest } from '../context/TestContext';
 import Link from 'next/link';
 import { useRef } from 'react';
 import domtoimage from 'dom-to-image-more';
+import { saveAs } from 'file-saver';
 
 
 
@@ -59,7 +60,7 @@ const ResultsPage = () => {
 
     element.classList.add('screenshot-mode');
 
-    domtoimage.toPng(element, {
+    domtoimage.toBlob(element, {
       quality: 1.0,
       bgcolor: document.documentElement.classList.contains('dark') ? '#1f2937' : '#ffffff',
       style: {
@@ -67,11 +68,10 @@ const ResultsPage = () => {
         transformOrigin: 'top left',
       }
     })
-    .then(function (dataUrl: string) {
-        const link = document.createElement('a');
-        link.download = 'moca-test-results.png';
-        link.href = dataUrl;
-        link.click();
+    .then(function (blob: Blob | null) {
+        if (blob) {
+          saveAs(blob, 'moca-test-results.png');
+        }
     })
     .catch(function (error: Error) {
         console.error('oops, something went wrong!', error);

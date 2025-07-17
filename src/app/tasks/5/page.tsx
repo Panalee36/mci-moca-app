@@ -47,34 +47,34 @@ const AttentionTask5 = () => {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto p-8 bg-white rounded-2xl shadow-lg">
-      <h2 className="text-2xl font-bold text-center text-blue-800 mb-4">แบบทดสอบที่ 5: การจำตัวเลข</h2>
-      <p className="text-lg text-center text-gray-600 mb-4">รอบที่ {trialIndex + 1} / {trials.length}</p>
+    <div className="w-full max-w-2xl mx-auto p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg">
+      <h2 className="text-2xl font-bold text-center text-blue-800 dark:text-blue-300 mb-4">แบบทดสอบที่ 5: การจำตัวเลข</h2>
+      <p className="text-lg text-center text-gray-600 dark:text-gray-400 mb-4">รอบที่ {trialIndex + 1} / {trials.length}</p>
 
       {phase === 'viewing' && (
         <div className="text-center">
-          <p className="text-lg text-gray-700 mb-6"><strong>คำสั่ง:</strong> โปรดจดจำลำดับตัวเลขต่อไปนี้</p>
-          <div className="p-6 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-4xl font-bold tracking-widest text-gray-800">{trials[trialIndex].sequence}</p>
+          <p className="text-lg text-gray-700 dark:text-gray-300 mb-6"><strong>คำสั่ง:</strong> โปรดจดจำลำดับตัวเลขต่อไปนี้</p>
+          <div className="p-6 bg-blue-50 dark:bg-blue-900/50 border border-blue-200 dark:border-blue-700 rounded-lg">
+            <p className="text-4xl font-bold tracking-widest text-gray-800 dark:text-gray-100">{trials[trialIndex].sequence}</p>
           </div>
-          <p className="mt-4 text-sm text-gray-500">หน้าจอจะเปลี่ยนโดยอัตโนมัติ...</p>
+          <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">หน้าจอจะเปลี่ยนโดยอัตโนมัติ...</p>
         </div>
       )}
 
       {phase === 'recalling' && (
         <div className="text-center">
-          <p className="text-lg text-gray-700 mb-6"><strong>คำสั่ง:</strong> {trials[trialIndex].instruction}</p>
+          <p className="text-lg text-gray-700 dark:text-gray-300 mb-6"><strong>คำสั่ง:</strong> {trials[trialIndex].instruction}</p>
           <input
             type="text"
             value={userInput}
             onChange={handleInputChange}
-            className="w-full p-3 border border-gray-300 rounded-lg text-2xl text-center tracking-widest focus:ring-2 focus:ring-blue-400 focus:outline-none"
+            className="w-full p-3 border border-gray-300 rounded-lg text-2xl text-center tracking-widest focus:ring-2 focus:ring-blue-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:focus:ring-blue-500"
             placeholder="เช่น 1 2 3 4 5"
           />
           <button
             onClick={checkAnswer}
             disabled={!userInput.trim()}
-            className="mt-8 px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+            className="mt-8 px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed dark:bg-blue-700 dark:hover:bg-blue-600 dark:disabled:bg-gray-500"
           >
             บันทึกคำตอบ
           </button>
@@ -83,7 +83,7 @@ const AttentionTask5 = () => {
 
       {phase === 'finished' && (
         <div className="text-center flex flex-col items-center gap-6">
-          <div className="p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded-lg w-full max-w-md text-center">
+          <div className="p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded-lg w-full max-w-md text-center dark:bg-green-900/50 dark:border-green-400 dark:text-green-200">
             <p className="font-bold">บันทึกคำตอบเรียบร้อย</p>
             <p>โปรดกดปุ่ม &quot;ถัดไป&quot; เพื่อทำแบบทดสอบข้อต่อไป</p>
           </div>

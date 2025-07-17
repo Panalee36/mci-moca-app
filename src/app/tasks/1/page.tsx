@@ -17,29 +17,29 @@ const VisuospatialTask1 = () => {
   const [score, setScore] = useState<number | null>(null);
   const [userPath, setUserPath] = useState<number[]>([]);
   const [selectedPoint, setSelectedPoint] = useState<number | null>(null);
-  const [connections, setConnections] = useState<Array<{from: number, to: number}>>([]);
+  const [connections, setConnections] = useState<Array<{ from: number, to: number }>>([]);
 
   // State to hold the randomly offset points
   const [points, setPoints] = useState<Point[]>([]);
 
   // Define the original base points with better mobile-friendly positioning
   const basePoints = useMemo(() => [
-    {label: '1', x: 15, y: 15, id: 0},
-    {label: 'ก', x: 50, y: 10, id: 1},
-    {label: '2', x: 85, y: 20, id: 2},
-    {label: 'ข', x: 15, y: 50, id: 3},
-    {label: '3', x: 50, y: 45, id: 4},
-    {label: 'ค', x: 85, y: 55, id: 5},
-    {label: '4', x: 15, y: 85, id: 6},
-    {label: 'ง', x: 50, y: 80, id: 7},
-    {label: '5', x: 85, y: 90, id: 8},
+    { label: '1', x: 15, y: 15, id: 0 },
+    { label: 'ก', x: 50, y: 10, id: 1 },
+    { label: '2', x: 85, y: 20, id: 2 },
+    { label: 'ข', x: 15, y: 50, id: 3 },
+    { label: '3', x: 50, y: 45, id: 4 },
+    { label: 'ค', x: 85, y: 55, id: 5 },
+    { label: '4', x: 15, y: 85, id: 6 },
+    { label: 'ง', x: 50, y: 80, id: 7 },
+    { label: '5', x: 85, y: 90, id: 8 },
   ], []);
 
   // Function to generate points with a random offset
   const generateOffsetPoints = useCallback((): Point[] => {
     // Generate small random offsets to make each test unique
     const maxOffset = 8; // Smaller offset for mobile
-    
+
     return basePoints.map(point => ({
       ...point,
       x: point.x + (Math.random() - 0.5) * maxOffset,
@@ -55,7 +55,7 @@ const VisuospatialTask1 = () => {
   // Handle point click
   const handlePointClick = (pointId: number) => {
     if (score !== null) return; // Don't allow interaction after scoring
-    
+
     if (selectedPoint === null) {
       // First click - select the point
       setSelectedPoint(pointId);
@@ -91,15 +91,15 @@ const VisuospatialTask1 = () => {
   const checkAnswer = () => {
     // The correct sequence: 1 → ก → 2 → ข → 3 → ค → 4 → ง → 5
     const correctSequence = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-    
+
     // Check if connections follow the correct sequence
-    const isCorrect = connections.length === 8 && 
+    const isCorrect = connections.length === 8 &&
       connections.every((conn, index) => {
         const expectedFrom = correctSequence[index];
         const expectedTo = correctSequence[index + 1];
         return conn.from === expectedFrom && conn.to === expectedTo;
       });
-    
+
     const newScore = isCorrect ? 1 : 0;
     setScore(newScore);
     updateScore(1, newScore);
@@ -116,34 +116,34 @@ const VisuospatialTask1 = () => {
   const getPointClasses = (pointId: number) => {
     const status = getPointStatus(pointId);
     const baseClasses = 'w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 flex items-center justify-center font-bold text-sm sm:text-base cursor-pointer transition-all duration-200 hover:scale-110';
-    
+
     switch (status) {
       case 'selected':
-        return `${baseClasses} bg-yellow-400 border-yellow-600 text-yellow-900 ring-2 ring-yellow-300`;
+        return `${baseClasses} bg-yellow-400 border-yellow-600 text-yellow-900 ring-2 ring-yellow-300 dark:bg-yellow-500 dark:border-yellow-700 dark:text-yellow-900 dark:ring-yellow-400`;
       case 'connected':
-        return `${baseClasses} bg-blue-500 border-blue-600 text-white`;
+        return `${baseClasses} bg-blue-500 border-blue-600 text-white dark:bg-blue-600 dark:border-blue-700`;
       default:
-        return `${baseClasses} bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200`;
+        return `${baseClasses} bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:border-gray-500 dark:text-gray-200 dark:hover:bg-gray-600`;
     }
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 bg-white rounded-2xl shadow-lg">
-      <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-center text-blue-800 mb-4">แบบทดสอบที่ 1: การมองเห็นและบริหารจัดการ</h2>
-      <p className="text-sm sm:text-base lg:text-lg text-center text-gray-700 mb-4 sm:mb-6 px-2">
+    <div className="w-full max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg">
+      <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-center text-blue-800 dark:text-blue-300 mb-4">แบบทดสอบที่ 1: การมองเห็นและบริหารจัดการ</h2>
+      <p className="text-sm sm:text-base lg:text-lg text-center text-gray-700 dark:text-gray-300 mb-4 sm:mb-6 px-2">
         <strong>คำสั่ง:</strong> โปรดคลิกเลือกจุดต่างๆ ตามลำดับ สลับกัน โดยเริ่มจาก หมายเลข 1 → ตัวอักษร ก, ต่อด้วย หมายเลข 2 → ตัวอักษร ข, และดำเนินการเช่นนี้ไปเรื่อย ๆ จนถึง หมายเลข 5
       </p>
 
       {selectedPoint !== null && (
-        <div className="text-center mb-4 p-3 bg-yellow-100 border border-yellow-300 rounded-lg">
-          <p className="text-sm sm:text-base text-yellow-800">
+        <div className="text-center mb-4 p-3 bg-yellow-100 border border-yellow-300 rounded-lg dark:bg-yellow-900/50 dark:border-yellow-700/50">
+          <p className="text-sm sm:text-base text-yellow-800 dark:text-yellow-200">
             <strong>เลือกแล้ว:</strong> {points.find(p => p.id === selectedPoint)?.label} - คลิกจุดถัดไปเพื่อเชื่อมต่อ
           </p>
         </div>
       )}
 
       <div className="flex justify-center mb-4 sm:mb-6">
-        <div className="relative w-full max-w-md h-64 sm:h-80 border-2 border-gray-300 rounded-lg bg-gray-50 overflow-hidden">
+        <div className="relative w-full max-w-md h-64 sm:h-80 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900/50 overflow-hidden">
           {points.map((point) => (
             <button
               key={point.id}
@@ -160,14 +160,14 @@ const VisuospatialTask1 = () => {
               {point.label}
             </button>
           ))}
-          
+
           {/* Draw connection lines */}
           <svg className="absolute inset-0 w-full h-full pointer-events-none">
             {connections.map((conn, index) => {
               const fromPoint = points.find(p => p.id === conn.from);
               const toPoint = points.find(p => p.id === conn.to);
               if (!fromPoint || !toPoint) return null;
-              
+
               return (
                 <line
                   key={index}
@@ -175,7 +175,7 @@ const VisuospatialTask1 = () => {
                   y1={`${fromPoint.y}%`}
                   x2={`${toPoint.x}%`}
                   y2={`${toPoint.y}%`}
-                  stroke="#3b82f6"
+                  className="stroke-blue-500 dark:stroke-blue-400"
                   strokeWidth="3"
                   strokeLinecap="round"
                 />
@@ -190,11 +190,11 @@ const VisuospatialTask1 = () => {
           <button
             onClick={checkAnswer}
             disabled={connections.length < 8 || score !== null}
-            className="px-6 sm:px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 disabled:bg-gray-400 transition-colors text-sm sm:text-base"
+            className="px-6 sm:px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 disabled:bg-gray-400 disabled:text-gray-200 transition-colors text-sm sm:text-base dark:bg-blue-700 dark:hover:bg-blue-600 dark:disabled:bg-gray-600 dark:disabled:text-gray-400"
           >
             บันทึกคำตอบ
           </button>
-          
+
           <button
             onClick={resetTask}
             disabled={score !== null}

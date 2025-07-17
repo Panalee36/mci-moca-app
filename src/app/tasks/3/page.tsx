@@ -1,26 +1,28 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { useTheme } from 'next-themes';
 import { useTest } from '../../context/TestContext';
 import { TaskNavigation } from '../../components/TaskNavigation';
 import Image from 'next/image';
-import square2dImage from '../../img/drawing/square.jpg'; 
+import square2dImage from '../../img/drawing/square.jpg';
 
 // --- ค่าคงที่สำหรับ Dot Game ---
-const GRID_SIZE = 10; 
-const DOT_SPACING = 40; 
-const CANVAS_OFFSET = 50; 
+const GRID_SIZE = 10;
+const DOT_SPACING = 40;
+const CANVAS_OFFSET = 50;
 
 // ค่าที่ปรับปรุงสำหรับผู้สูงอายุ: จุดใหญ่ขึ้น, คลิกง่ายขึ้น, เส้นหนาขึ้น
-const DOT_RADIUS = 10; 
-const ACTIVE_DOT_RADIUS = 12; 
-const DOT_DETECTION_RADIUS = 30; 
-const LINE_WIDTH = 4; 
+const DOT_RADIUS = 10;
+const ACTIVE_DOT_RADIUS = 12;
+const DOT_DETECTION_RADIUS = 30;
+const LINE_WIDTH = 4;
 
 // ไม่จำเป็นต้องใช้ CORRECT_SHAPE_LINES อีกต่อไปในเวอร์ชันนี้
 // เพราะเราจะไม่เปรียบเทียบรูปทรงที่ถูกต้องแล้ว
 
 const DrawingTask3 = () => {
+    const { theme } = useTheme();
     const { updateScore } = useTest();
     const [phase, setPhase] = useState<'viewing' | 'drawing' | 'finished'>('viewing');
 
@@ -45,7 +47,7 @@ const DrawingTask3 = () => {
 
     useEffect(() => {
         if (phase === 'viewing') {
-            const timer = setTimeout(() => setPhase('drawing'), 15000); 
+            const timer = setTimeout(() => setPhase('drawing'), 15000);
             return () => clearTimeout(timer);
         }
     }, [phase]);
@@ -77,7 +79,7 @@ const DrawingTask3 = () => {
 
         dots.forEach((dot, index) => {
             const dist = Math.sqrt(Math.pow(x - dot.x, 2) + Math.pow(y - dot.y, 2));
-            if (dist < minDistance && dist < DOT_DETECTION_RADIUS) { 
+            if (dist < minDistance && dist < DOT_DETECTION_RADIUS) {
                 minDistance = dist;
                 nearestDotIndex = index;
             }
@@ -104,19 +106,24 @@ const DrawingTask3 = () => {
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
+        const isDarkMode = theme === 'dark';
+        const dotColor = isDarkMode ? '#6B7280' : '#999';
+        const activeDotColor = isDarkMode ? '#60A5FA' : 'blue';
+        const lineColor = isDarkMode ? '#E5E7EB' : '#333';
+
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         if (phase === 'drawing') {
             dots.forEach((dot, index) => {
                 ctx.beginPath();
                 ctx.arc(dot.x, dot.y, DOT_RADIUS, 0, Math.PI * 2);
-                ctx.fillStyle = '#999'; 
+                ctx.fillStyle = dotColor;
                 ctx.fill();
 
                 if (activeDotIndex === index) {
                     ctx.beginPath();
                     ctx.arc(dot.x, dot.y, ACTIVE_DOT_RADIUS, 0, Math.PI * 2);
-                    ctx.fillStyle = 'blue';
+                    ctx.fillStyle = activeDotColor;
                     ctx.fill();
                 }
             });
@@ -125,15 +132,15 @@ const DrawingTask3 = () => {
                 const fromDot = dots[line.from];
                 const toDot = dots[line.to];
                 if (fromDot && toDot) {
-                    drawLine(fromDot.x, fromDot.y, toDot.x, toDot.y);
+                    drawLine(fromDot.x, fromDot.y, toDot.x, toDot.y, lineColor);
                 }
             });
         }
-    }, [phase, dots, drawnLines, activeDotIndex, drawLine]); 
+    }, [phase, dots, drawnLines, activeDotIndex, drawLine, theme]);
 
-    const handleInteraction = useCallback((pos: {x: number, y: number}) => {
+    const handleInteraction = useCallback((pos: { x: number, y: number }) => {
         if (phase !== 'drawing') return;
-        
+
         const clickedDotIndex = getNearestDotIndex(pos.x, pos.y);
 
         if (clickedDotIndex !== null) {
@@ -150,15 +157,15 @@ const DrawingTask3 = () => {
                 if (!isDuplicate && newLine.from !== newLine.to) {
                     setDrawnLines(prevLines => [...prevLines, newLine]);
                 }
-                setActiveDotIndex(null); 
+                setActiveDotIndex(null);
             }
         } else {
-            setActiveDotIndex(null); 
+            setActiveDotIndex(null);
         }
     }, [getNearestDotIndex, activeDotIndex, drawnLines, phase]);
 
     const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-        if (e.button !== 0) return; 
+        if (e.button !== 0) return;
         const canvas = canvasRef.current;
         if (!canvas) return;
 
@@ -167,7 +174,7 @@ const DrawingTask3 = () => {
     }, [getMousePos, handleInteraction]);
 
     const handleTouchStart = useCallback((e: React.TouchEvent<HTMLCanvasElement>) => {
-        e.preventDefault(); // Prevent scrolling and other touch behaviors
+        e.preventDefault();
         const canvas = canvasRef.current;
         if (!canvas) return;
 
@@ -176,69 +183,66 @@ const DrawingTask3 = () => {
     }, [getTouchPos, handleInteraction]);
 
     const clearCanvas = useCallback(() => {
-        setDrawnLines([]); 
-        setActiveDotIndex(null); 
+        setDrawnLines([]);
+        setActiveDotIndex(null);
         const canvas = canvasRef.current;
         const ctx = canvas?.getContext('2d');
         if (ctx) {
-            ctx.clearRect(0, 0, canvas!.width, canvas!.height); 
+            ctx.clearRect(0, 0, canvas!.width, canvas!.height);
         }
     }, []);
 
-    // *** ปรับปรุงการให้คะแนน: วาด 1 เส้นก็ได้ 1 คะแนนเต็ม ***
     const submitDrawing = useCallback(() => {
-        // ตรวจสอบว่ามีเส้นวาดอย่างน้อย 1 เส้นหรือไม่
-        const newScore = drawnLines.length > 0 ? 1 : 0; // ถ้ามีเส้นวาด จะได้ 1 คะแนน มิฉะนั้นจะได้ 0
-
-        updateScore(3, newScore); 
+        const newScore = drawnLines.length > 0 ? 1 : 0;
+        updateScore(3, newScore);
         setPhase('finished');
-    }, [drawnLines, updateScore]); // drawnLines เป็น dependency เพื่อให้โค้ดทำงานถูกต้อง
+    }, [drawnLines, updateScore]);
 
     return (
-        <div className="w-full max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 bg-white rounded-2xl shadow-lg">
-            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-center text-blue-800 mb-4">แบบทดสอบที่ 3: การวาดรูป</h2>
-            <p className="text-sm sm:text-base lg:text-lg text-center text-gray-700 mb-4 sm:mb-6 px-2"><strong>คำสั่ง:</strong> ดูรูปต่อไปนี้ให้ดี แล้วจำไว้ เพื่อที่จะวาดตามในขั้นตอนต่อไป</p>
+        <div className="w-full max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg">
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-center text-blue-800 dark:text-blue-300 mb-4">แบบทดสอบที่ 3: การวาดรูป</h2>
+            <p className="text-sm sm:text-base lg:text-lg text-center text-gray-700 dark:text-gray-300 mb-4 sm:mb-6 px-2"><strong>คำสั่ง:</strong> ดูรูปต่อไปนี้ให้ดี แล้วจำไว้ เพื่อที่จะวาดตามในขั้นตอนต่อไป</p>
             {phase === 'viewing' && (
                 <div className="text-center">
-                    <p className="text-sm sm:text-base lg:text-lg text-gray-700 mb-4 sm:mb-6"><strong>คำสั่ง:</strong> โปรดจดจำภาพสี่เหลี่ยมนี้ คุณมีเวลา 15 วินาที</p>
+                    <p className="text-sm sm:text-base lg:text-lg text-gray-700 dark:text-gray-300 mb-4 sm:mb-6"><strong>คำสั่ง:</strong> โปรดจดจำภาพสี่เหลี่ยมนี้ คุณมีเวลา 15 วินาที</p>
                     <div className="flex justify-center mb-4">
-                        <Image 
-                            src={square2dImage} 
-                            alt="2D Square Example" 
-                            width={400} 
-                            height={400} 
-                            className="rounded-lg shadow-md max-w-full h-auto w-64 sm:w-80 lg:w-96" 
+                        <Image
+                            src={square2dImage}
+                            alt="2D Square Example"
+                            width={400}
+                            height={400}
+                            className="rounded-lg shadow-md max-w-full h-auto w-64 sm:w-80 lg:w-96"
                         />
                     </div>
-                    <p className="mt-4 text-xs sm:text-sm text-gray-500">หน้าจอจะเปลี่ยนโดยอัตโนมัติเมื่อหมดเวลา...</p>
+                    <p className="mt-4 text-xs sm:text-sm text-gray-500 dark:text-gray-400">หน้าจอจะเปลี่ยนโดยอัตโนมัติเมื่อหมดเวลา...</p>
                 </div>
             )}
 
             {phase === 'drawing' && (
                 <div className="text-center">
-                    <p className="text-sm sm:text-base lg:text-lg text-gray-700 mb-4 sm:mb-6"><strong>คำสั่ง:</strong> เริ่มจาดจุดไหนก่อนก็ได้โดยการเชื่อมจุดตามรูปที่เห็นก่อนหน้านี้</p>
+                    <p className="text-sm sm:text-base lg:text-lg text-gray-700 dark:text-gray-300 mb-4 sm:mb-6"><strong>คำสั่ง:</strong> เริ่มจาดจุดไหนก่อนก็ได้โดยการเชื่อมจุดตามรูปที่เห็นก่อนหน้านี้</p>
                     <div className="flex justify-center mb-4 sm:mb-6 overflow-x-auto">
                         <canvas
                             ref={canvasRef}
                             width={GRID_SIZE * DOT_SPACING + 2 * CANVAS_OFFSET}
                             height={GRID_SIZE * DOT_SPACING + 2 * CANVAS_OFFSET}
-                            className="border-2 sm:border-4 border-blue-400 rounded-lg bg-white cursor-crosshair shadow-lg max-w-full h-auto"
+                            className="border-2 sm:border-4 border-blue-400 dark:border-blue-600 rounded-lg bg-white dark:bg-gray-700 cursor-crosshair shadow-lg max-w-full h-auto"
                             style={{ minWidth: '320px', touchAction: 'none' }}
                             onMouseDown={handleMouseDown}
                             onTouchStart={handleTouchStart}
                         />
                     </div>
                     <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mt-4">
-                        <button 
-                            onClick={clearCanvas} 
-                            className="px-4 sm:px-6 py-2 sm:py-3 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300 transition-colors text-sm sm:text-base w-full sm:w-auto"
+                        <button
+                            onClick={clearCanvas}
+                            className="px-4 sm:px-6 py-2 sm:py-3 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300 transition-colors text-sm sm:text-base w-full sm:w-auto dark:bg-gray-600 dark:text-gray-100 dark:hover:bg-gray-500"
                         >
                             ล้างทั้งหมด
                         </button>
-                        <button 
-                            onClick={submitDrawing} 
-                            disabled={drawnLines.length === 0} 
-                            className="px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm sm:text-base w-full sm:w-auto"
+                        <button
+                            onClick={submitDrawing}
+                            disabled={drawnLines.length === 0}
+                            className="px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm sm:text-base w-full sm:w-auto dark:bg-blue-700 dark:hover:bg-blue-600 dark:disabled:bg-gray-500"
                         >
                             บันทึกคำตอบ
                         </button>
@@ -248,7 +252,7 @@ const DrawingTask3 = () => {
 
             {phase === 'finished' && (
                 <div className="text-center flex flex-col items-center gap-4 sm:gap-6">
-                    <div className="mt-4 sm:mt-6 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded-lg w-full max-w-md">
+                    <div className="mt-4 sm:mt-6 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded-lg w-full max-w-md dark:bg-green-900/50 dark:border-green-400 dark:text-green-200">
                         <p className="text-lg sm:text-xl font-bold">บันทึกคำตอบเรียบร้อย</p>
                         <p className="text-sm sm:text-base">โปรดกดปุ่ม &quot;ถัดไป&quot; เพื่อทำแบบทดสอบข้อต่อไป</p>
                     </div>

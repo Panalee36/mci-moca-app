@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef } from 'react';
 // 1. นำเข้า List คำศัพท์ทั้งหมดจากไฟล์ JSON
-import fullWordList from './thai-wordlist.json'; 
+import fullWordList from './thai-wordlist.json';
 import { useTest } from '../../context/TestContext';
 import { TaskNavigation } from '../../components/TaskNavigation';
 
@@ -81,38 +81,42 @@ const LanguageTask8 = () => {
     setIsStarted(true);
   };
 
-  // แสดงผลว่ากำลังโหลดโจทย์ หากยังสุ่มตัวอักษรไม่เสร็จ
   if (!targetLetter) {
-    return <div className="text-center p-8">กำลังเตรียมโจทย์...</div>;
+    return <div className="text-center p-8 dark:text-gray-300">กำลังเตรียมโจทย์...</div>;
   }
 
   return (
-    <div className="w-full max-w-2xl mx-auto p-8 bg-white rounded-2xl shadow-lg text-center">
-      <h2 className="text-2xl font-bold text-blue-800 mb-4">แบบทดสอบ: ภาษา - การสร้างคำ</h2>
-      <p className="text-lg text-gray-700 mb-6">
-        {/* 7. แสดงตัวอักษรโจทย์ที่สุ่มมาได้ */}
+    <div className="w-full max-w-2xl mx-auto p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg text-center">
+      <h2 className="text-2xl font-bold text-blue-800 dark:text-blue-300 mb-4">แบบทดสอบ: ภาษา - การสร้างคำ</h2>
+      <p className="text-lg text-gray-700 dark:text-gray-300 mb-6">
         <strong>คำสั่ง:</strong> โปรดบอกชื่อคำนามที่ขึ้นต้นด้วยตัวอักษร <strong>&quot;{targetLetter}&quot;</strong> ให้ได้มากที่สุดภายใน 1 นาที
       </p>
 
       {!isStarted ? (
-        <button onClick={startTest} className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors">
+        <button onClick={startTest} className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 transition-colors">
           เริ่มจับเวลา
         </button>
       ) : score === null ? (
         <div>
-          <div className="text-4xl font-bold text-red-600 mb-6">{timeLeft} วินาที</div>
+          <div className="text-4xl font-bold text-red-600 dark:text-red-500 mb-6">{timeLeft} วินาที</div>
           <textarea
             value={text}
             onChange={e => setText(e.target.value)}
-            className="w-full h-48 p-3 border border-gray-300 rounded-lg text-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+            className="w-full h-48 p-3 border border-gray-300 rounded-lg text-lg focus:ring-2 focus:ring-blue-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:focus:ring-blue-500"
             placeholder={`พิมพ์คำที่ขึ้นต้นด้วย "${targetLetter}" ที่นี่...`}
             disabled={timeLeft === 0}
           />
-
+          <button
+            onClick={checkAnswers}
+            className="mt-4 px-8 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition-colors disabled:bg-gray-400 dark:bg-green-700 dark:hover:bg-green-600 dark:disabled:bg-gray-500"
+            disabled={timeLeft === 0}
+          >
+            ตรวจคำตอบ
+          </button>
         </div>
       ) : (
         <div className="mt-6 flex flex-col items-center gap-6">
-          <div className="p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded-lg w-full max-w-md text-center">
+          <div className="p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded-lg w-full max-w-md text-center dark:bg-green-900/50 dark:border-green-400 dark:text-green-200">
             <p className="font-bold">หมดเวลา!</p>
             <p>คุณตอบคำที่ถูกต้องและไม่ซ้ำกันได้ {correctWordCount} คำ</p>
             <p>โปรดกดปุ่ม &quot;ถัดไป&quot; เพื่อทำแบบทดสอบข้อต่อไป</p>

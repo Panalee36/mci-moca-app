@@ -8,7 +8,7 @@ import { TaskNavigation } from '../../components/TaskNavigation';
 
 // 2. สร้าง Array ของพยัญชนะไทยสำหรับใช้ในการสุ่มโจทย์
 const CONSONANTS = [
-  'ก', 'น',  'ค','ร','ม','ต','บ','ค','ป','ท','จ','ห','ส'
+  'ก'
 ];
 
 const LanguageTask8 = () => {

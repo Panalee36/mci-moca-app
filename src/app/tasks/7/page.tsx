@@ -13,10 +13,9 @@ const SubtractionTask7 = () => {
   // --- ส่วนที่ 1: การสร้างโจทย์แบบสุ่ม ---
   // ใช้ useMemo เพื่อให้ค่าสุ่มถูกสร้างขึ้นเพียงครั้งเดียวเมื่อคอมโพเนนต์เริ่มทำงาน
   const quizData = useMemo(() => {
-    // สุ่มเลขเริ่มต้นระหว่าง 60 ถึง 100
-    const startNumber = Math.floor(Math.random() * 41) + 60;
-    // สุ่มเลขสำหรับลบระหว่าง 6 ถึง 9
-    const subtrahend = Math.floor(Math.random() * 4) + 6;
+    // Set fixed numbers for the quiz
+    const startNumber = 100;
+    const subtrahend = 7;
 
     const correctAnswers = [];
     let currentNumber = startNumber;
@@ -61,28 +60,26 @@ const SubtractionTask7 = () => {
   return (
     // --- ส่วนที่ 2: ปรับปรุงดีไซน์ (UI/UX) ---
     // ใช้พื้นหลังสีอ่อน (slate-50) เพื่อลดแสงจ้า และเพิ่ม padding (p-8)
-    <div className="w-full max-w-3xl mx-auto p-8 bg-slate-50 rounded-3xl shadow-lg">
+    <div className="w-full max-w-3xl mx-auto p-4 sm:p-6 lg:p-8 bg-slate-50 rounded-3xl shadow-lg">
       <div className="text-center">
-        {/* เพิ่มขนาดหัวข้อเป็น 3xl และใช้สีเข้มขึ้นเพื่อความชัดเจน */}
-        <h2 className="text-3xl font-bold text-gray-800 mb-4">
-          🧠 แบบทดสอบที่ 7: ฝึกสมาธิ
+        <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 mb-4">
+          แบบทดสอบที่ 7: ลบตัวเลข
         </h2>
-        {/* เพิ่มขนาดคำสั่งเป็น xl และใช้ประโยคที่เข้าใจง่ายขึ้น */}
-        <p className="text-xl text-gray-700 mb-8">
+        <p className="text-sm sm:text-base lg:text-lg text-gray-700 mb-6 sm:mb-8 px-2">
           <strong>คำสั่ง:</strong> เริ่มจากตัวเลขที่กำหนดให้ แล้วลบออกตามจำนวนไปเรื่อยๆ ให้ครบทุกช่อง
         </p>
       </div>
 
       {/* --- ส่วนแสดงโจทย์และช่องกรอกคำตอบ --- */}
-      <div className="flex flex-col items-center gap-6 mb-10">
+      <div className="flex flex-col items-center gap-4 sm:gap-6 mb-8 sm:mb-10">
         {/* แสดงเลขเริ่มต้นในกล่องที่เด่นชัด */}
-        <div className="bg-blue-600 text-white px-8 py-4 rounded-xl shadow-md">
-          <p className="text-lg">เลขเริ่มต้น</p>
-          <p className="text-5xl font-bold">{quizData.startNumber}</p>
+        <div className="bg-blue-600 text-white px-4 sm:px-6 lg:px-8 py-3 sm:py-4 rounded-xl shadow-md">
+          <p className="text-sm sm:text-base lg:text-lg">เลขเริ่มต้น</p>
+          <p className="text-3xl sm:text-4xl lg:text-5xl font-bold">{quizData.startNumber}</p>
         </div>
 
         {/* วนลูปสร้างช่องกรอกคำตอบ */}
-        <div className="flex flex-col gap-5 w-full max-w-sm">
+        <div className="flex flex-col gap-3 sm:gap-4 lg:gap-5 w-full max-w-sm">
           {userAnswers.map((answer, index) => {
             // ตรวจสอบว่าคำตอบถูกหรือผิด (เมื่อผู้ใช้กดตรวจคำตอบแล้ว)
             // const isCorrect = parseInt(answer, 10) === quizData.correctAnswers[index];
@@ -92,16 +89,16 @@ const SubtractionTask7 = () => {
             const resultStyle = 'border-gray-300'; 
 
             return (
-              <div key={index} className="flex items-center justify-center gap-4">
+              <div key={index} className="flex items-center justify-center gap-2 sm:gap-3 lg:gap-4">
                 {/* แสดงตัวเลขก่อนหน้า หรือเลขเริ่มต้นสำหรับข้อแรก */}
-                <span className="text-3xl font-semibold text-gray-500 w-16 text-right">
+                <span className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-semibold text-gray-500 w-12 sm:w-14 lg:w-16 text-right">
                   {index === 0 ? quizData.startNumber : userAnswers[index - 1] || '...'}
                 </span>
                 {/* แสดงเครื่องหมายและตัวเลขที่ต้องลบให้ชัดเจน */}
-                <span className="text-3xl font-bold text-red-500">
+                <span className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-red-500">
                   - {quizData.subtrahend}
                 </span>
-                <span className="text-3xl font-bold text-gray-600">=</span>
+                <span className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-gray-600">=</span>
                 <input
                   type="text"
                   inputMode="numeric" // แสดงแป้นพิมพ์ตัวเลขบนมือถือ
@@ -109,7 +106,7 @@ const SubtractionTask7 = () => {
                   onChange={e => handleAnswerChange(index, e.target.value)}
                   disabled={isSubmitted} // ปิดการแก้ไขหลังส่งคำตอบ
                   // เพิ่มขนาดช่องกรอก, ตัวอักษร และปรับปรุงสไตล์
-                  className={`w-32 p-4 border-2 ${resultStyle} rounded-lg text-4xl text-center font-bold focus:ring-4 focus:ring-blue-300 focus:outline-none transition-all`}
+                  className={`w-20 sm:w-24 lg:w-28 xl:w-32 p-2 sm:p-3 lg:p-4 border-2 ${resultStyle} rounded-lg text-xl sm:text-2xl lg:text-3xl xl:text-4xl text-center font-bold focus:ring-4 focus:ring-blue-300 focus:outline-none transition-all`}
                   placeholder="?"
                 />
                 {/* ซ่อนไอคอนถูก/ผิด หลังตรวจคำตอบ */}
@@ -131,19 +128,19 @@ const SubtractionTask7 = () => {
           <button
             onClick={checkAnswers}
             // ปรับขนาดปุ่มให้ใหญ่และกดง่าย
-            className="px-10 py-4 bg-blue-600 text-white text-xl font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+            className="px-6 sm:px-8 lg:px-10 py-3 sm:py-4 bg-blue-600 text-white text-base sm:text-lg lg:text-xl font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed w-full sm:w-auto"
             disabled={userAnswers.some(a => a === '')} // ปิดปุ่มถ้ายังกรอกไม่ครบ
           >
-            ตรวจคำตอบ
+            บันทึกคำตอบ
           </button>
         ) : (
           // แสดงข้อความและปุ่ม "ถัดไป" หลังส่งคำตอบแล้ว
-          <div className="mt-6 flex flex-col items-center gap-6">
+          <div className="mt-4 sm:mt-6 flex flex-col items-center gap-4 sm:gap-6">
             <div className="p-4 bg-green-100 border-l-4 border-green-500 text-green-800 rounded-lg w-full max-w-md text-center">
-              <p className="font-bold text-lg">บันทึกคำตอบเรียบร้อย 👍</p>
-              <p className="text-base">กดปุ่ม &quot;ถัดไป&quot; เพื่อทำแบบทดสอบข้อต่อไปได้เลย</p>
+              <p className="font-bold text-base sm:text-lg">บันทึกคำตอบเรียบร้อย</p>
+              <p className="text-sm sm:text-base">กดปุ่ม &quot;ถัดไป&quot; เพื่อทำแบบทดสอบข้อต่อไปได้เลย</p>
             </div>
-            <TaskNavigation />
+            <TaskNavigation showBackButton={false} />
           </div>
         )}
       </div>

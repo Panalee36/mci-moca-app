@@ -48,7 +48,7 @@ const AttentionTask5 = () => {
 
   return (
     <div className="w-full max-w-2xl mx-auto p-8 bg-white rounded-2xl shadow-lg">
-      <h2 className="text-2xl font-bold text-center text-blue-800 mb-4">แบบทดสอบที่ 5: สมาธิ - การจำตัวเลข</h2>
+      <h2 className="text-2xl font-bold text-center text-blue-800 mb-4">แบบทดสอบที่ 5: การจำตัวเลข</h2>
       <p className="text-lg text-center text-gray-600 mb-4">รอบที่ {trialIndex + 1} / {trials.length}</p>
 
       {phase === 'viewing' && (
@@ -76,7 +76,7 @@ const AttentionTask5 = () => {
             disabled={!userInput.trim()}
             className="mt-8 px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
-            ตรวจสอบคำตอบ
+            บันทึกคำตอบ
           </button>
         </div>
       )}

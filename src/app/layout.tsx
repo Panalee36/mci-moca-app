@@ -17,15 +17,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="th">
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#ffffff" />
+      </head>
       <body className={`${noto_sans_thai.className} bg-slate-50`}>
         <TestProvider>
           <div className="min-h-screen flex flex-col">
             <header className="bg-white shadow-md">
-              <nav className="container mx-auto px-6 py-4">
-                                <h1 className="text-2xl font-bold text-blue-800">แบบประเมิน MoCA</h1>
+              <nav className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
+                <h1 className="text-xl sm:text-2xl font-bold text-blue-800">แบบประเมิน MoCA</h1>
               </nav>
             </header>
-            <main className="flex-grow container mx-auto p-6">
+            <main className="flex-grow container mx-auto px-4 sm:px-6 py-4 sm:py-6">
               {children}
             </main>
           </div>

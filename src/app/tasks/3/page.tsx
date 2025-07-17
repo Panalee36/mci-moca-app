@@ -52,9 +52,22 @@ const DrawingTask3 = () => {
 
     const getMousePos = useCallback((canvas: HTMLCanvasElement, evt: MouseEvent | React.MouseEvent) => {
         const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
         return {
-            x: evt.clientX - rect.left,
-            y: evt.clientY - rect.top,
+            x: (evt.clientX - rect.left) * scaleX,
+            y: (evt.clientY - rect.top) * scaleY,
+        };
+    }, []);
+
+    const getTouchPos = useCallback((canvas: HTMLCanvasElement, evt: TouchEvent | React.TouchEvent) => {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const touch = evt.touches[0] || evt.changedTouches[0];
+        return {
+            x: (touch.clientX - rect.left) * scaleX,
+            y: (touch.clientY - rect.top) * scaleY,
         };
     }, []);
 
@@ -118,12 +131,9 @@ const DrawingTask3 = () => {
         }
     }, [phase, dots, drawnLines, activeDotIndex, drawLine]); 
 
-    const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-        if (e.button !== 0 || phase !== 'drawing') return; 
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-
-        const pos = getMousePos(canvas, e);
+    const handleInteraction = useCallback((pos: {x: number, y: number}) => {
+        if (phase !== 'drawing') return;
+        
         const clickedDotIndex = getNearestDotIndex(pos.x, pos.y);
 
         if (clickedDotIndex !== null) {
@@ -145,7 +155,25 @@ const DrawingTask3 = () => {
         } else {
             setActiveDotIndex(null); 
         }
-    }, [getMousePos, getNearestDotIndex, activeDotIndex, drawnLines, phase]);
+    }, [getNearestDotIndex, activeDotIndex, drawnLines, phase]);
+
+    const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+        if (e.button !== 0) return; 
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        const pos = getMousePos(canvas, e);
+        handleInteraction(pos);
+    }, [getMousePos, handleInteraction]);
+
+    const handleTouchStart = useCallback((e: React.TouchEvent<HTMLCanvasElement>) => {
+        e.preventDefault(); // Prevent scrolling and other touch behaviors
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        const pos = getTouchPos(canvas, e);
+        handleInteraction(pos);
+    }, [getTouchPos, handleInteraction]);
 
     const clearCanvas = useCallback(() => {
         setDrawnLines([]); 
@@ -167,43 +195,62 @@ const DrawingTask3 = () => {
     }, [drawnLines, updateScore]); // drawnLines เป็น dependency เพื่อให้โค้ดทำงานถูกต้อง
 
     return (
-        <div className="w-full max-w-4xl mx-auto p-8 bg-white rounded-2xl shadow-lg">
-            <h2 className="text-2xl font-bold text-center text-blue-800 mb-4">แบบทดสอบที่ 3: การวาดภาพ</h2>
-
+        <div className="w-full max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 bg-white rounded-2xl shadow-lg">
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-center text-blue-800 mb-4">แบบทดสอบที่ 3: การวาดรูป</h2>
+            <p className="text-sm sm:text-base lg:text-lg text-center text-gray-700 mb-4 sm:mb-6 px-2"><strong>คำสั่ง:</strong> ดูรูปต่อไปนี้ให้ดี แล้วจำไว้ เพื่อที่จะวาดตามในขั้นตอนต่อไป</p>
             {phase === 'viewing' && (
                 <div className="text-center">
-                    <p className="text-lg text-gray-700 mb-6"><strong>คำสั่ง:</strong> โปรดจดจำภาพสี่เหลี่ยมนี้ คุณมีเวลา 15 วินาที</p>
-                    <div className="flex justify-center">
-                        <Image src={square2dImage} alt="2D Square Example" width={400} height={400} className="rounded-lg shadow-md" />
+                    <p className="text-sm sm:text-base lg:text-lg text-gray-700 mb-4 sm:mb-6"><strong>คำสั่ง:</strong> โปรดจดจำภาพสี่เหลี่ยมนี้ คุณมีเวลา 15 วินาที</p>
+                    <div className="flex justify-center mb-4">
+                        <Image 
+                            src={square2dImage} 
+                            alt="2D Square Example" 
+                            width={400} 
+                            height={400} 
+                            className="rounded-lg shadow-md max-w-full h-auto w-64 sm:w-80 lg:w-96" 
+                        />
                     </div>
-                    <p className="mt-4 text-sm text-gray-500">หน้าจอจะเปลี่ยนโดยอัตโนมัติเมื่อหมดเวลา...</p>
+                    <p className="mt-4 text-xs sm:text-sm text-gray-500">หน้าจอจะเปลี่ยนโดยอัตโนมัติเมื่อหมดเวลา...</p>
                 </div>
             )}
 
             {phase === 'drawing' && (
                 <div className="text-center">
-                    <p className="text-lg text-gray-700 mb-6"><strong>คำสั่ง:</strong> เริ่มจาดจุดไหนก่อนก็ได้โดยการเชื่อมจุด</p>
-                    <div className="flex justify-center mb-4">
+                    <p className="text-sm sm:text-base lg:text-lg text-gray-700 mb-4 sm:mb-6"><strong>คำสั่ง:</strong> เริ่มจาดจุดไหนก่อนก็ได้โดยการเชื่อมจุดตามรูปที่เห็นก่อนหน้านี้</p>
+                    <div className="flex justify-center mb-4 sm:mb-6 overflow-x-auto">
                         <canvas
                             ref={canvasRef}
                             width={GRID_SIZE * DOT_SPACING + 2 * CANVAS_OFFSET}
                             height={GRID_SIZE * DOT_SPACING + 2 * CANVAS_OFFSET}
-                            className="border-4 border-blue-400 rounded-lg bg-white cursor-crosshair shadow-lg"
+                            className="border-2 sm:border-4 border-blue-400 rounded-lg bg-white cursor-crosshair shadow-lg max-w-full h-auto"
+                            style={{ minWidth: '320px', touchAction: 'none' }}
                             onMouseDown={handleMouseDown}
+                            onTouchStart={handleTouchStart}
                         />
                     </div>
-                    <div className="flex justify-center gap-4 mt-4">
-                        <button onClick={clearCanvas} className="px-6 py-2 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300 transition-colors">ล้างทั้งหมด</button>
-                        <button onClick={submitDrawing} disabled={drawnLines.length === 0} className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors">ส่งคำตอบ</button>
+                    <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mt-4">
+                        <button 
+                            onClick={clearCanvas} 
+                            className="px-4 sm:px-6 py-2 sm:py-3 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300 transition-colors text-sm sm:text-base w-full sm:w-auto"
+                        >
+                            ล้างทั้งหมด
+                        </button>
+                        <button 
+                            onClick={submitDrawing} 
+                            disabled={drawnLines.length === 0} 
+                            className="px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm sm:text-base w-full sm:w-auto"
+                        >
+                            บันทึกคำตอบ
+                        </button>
                     </div>
                 </div>
             )}
 
             {phase === 'finished' && (
-                <div className="text-center flex flex-col items-center gap-6">
-                    <div className="mt-6 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded-lg w-full max-w-md">
-                        <p className="text-xl font-bold">บันทึกคำตอบเรียบร้อย</p>
-                        <p>โปรดกดปุ่ม &quot;ถัดไป&quot; เพื่อทำแบบทดสอบข้อต่อไป</p>
+                <div className="text-center flex flex-col items-center gap-4 sm:gap-6">
+                    <div className="mt-4 sm:mt-6 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded-lg w-full max-w-md">
+                        <p className="text-lg sm:text-xl font-bold">บันทึกคำตอบเรียบร้อย</p>
+                        <p className="text-sm sm:text-base">โปรดกดปุ่ม &quot;ถัดไป&quot; เพื่อทำแบบทดสอบข้อต่อไป</p>
                     </div>
                     <TaskNavigation showBackButton={false} />
                 </div>

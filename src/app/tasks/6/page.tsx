@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTest } from '../../context/TestContext';
-import { TaskNavigation } from '../../components/TaskNavigation';
+
 
 // Generate a sequence of 30 numbers with exactly three '1's at random positions.
 const generateSequence = () => {
@@ -23,7 +23,7 @@ const generateSequence = () => {
 };
 
 const numberSequence = generateSequence();
-const totalOnes = 3; // We have exactly 3 ones in the sequence.
+
 
 const AttentionTask6 = () => {
   const { updateScore, goToNextTask } = useTest();
@@ -59,6 +59,15 @@ const AttentionTask6 = () => {
   }, [index, isFinished]);
 
   // This useEffect handles the logic for when the test ends.
+    const calculateScore = useCallback(() => {
+    // Give 1 point if the first tap is correct (hits = 1) and there are no errors.
+    if (hits === 1 && errors === 0) {
+      return 1;
+    }
+    return 0;
+  }, [hits, errors]);
+
+  // This useEffect handles the logic for when the test ends.
   useEffect(() => {
     const testShouldEnd = index >= numberSequence.length;
 
@@ -86,7 +95,7 @@ const AttentionTask6 = () => {
         goToNextTask();
       }, 1500);
     }
-  }, [isFinished, index, hits, errors, updateScore, goToNextTask]);
+  }, [isFinished, index, hits, errors, updateScore, goToNextTask, calculateScore]);
 
   const handleTap = useCallback(() => {
     if (tappedForCurrentIndex.current || isFinished) {
@@ -105,38 +114,32 @@ const AttentionTask6 = () => {
     }
   }, [isFinished, index]);
 
-  const calculateScore = () => {
-    // Give 1 point if the first tap is correct (hits = 1) and there are no errors.
-    if (hits === 1 && errors === 0) {
-      return 1;
-    }
-    return 0;
-  };
+
 
 
 
   return (
-    <div className="w-full max-w-2xl mx-auto p-8 bg-white rounded-2xl shadow-lg text-center">
-      <h2 className="text-2xl font-bold text-blue-800 mb-4">แบบทดสอบที่ 6: สมาธิ - การเคาะเมื่อเจอเลขเป้าหมาย</h2>
+    <div className="w-full max-w-2xl mx-auto p-4 sm:p-6 lg:p-8 bg-white rounded-2xl shadow-lg text-center">
+      <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-blue-800 mb-4">แบบทดสอบที่ 6: กดปุ่มเมื่อเจอเลขเป้าหมาย</h2>
 
       {!isFinished ? (
         <div>
-          <p className="text-lg text-gray-700 mb-6"><strong>คำสั่ง:</strong> โปรดกดปุ่มทุกครั้งที่เห็นหมายเลข <strong>1</strong></p>
-          <div className="h-48 flex items-center justify-center bg-gray-100 rounded-lg mb-6">
-            <p className="text-8xl font-bold text-gray-800">{numberSequence[index]}</p>
+          <p className="text-sm sm:text-base lg:text-lg text-gray-700 mb-4 sm:mb-6 px-2"><strong>คำสั่ง:</strong> โปรดกดปุ่มทุกครั้งที่เห็นหมายเลข <strong>1</strong></p>
+          <div className="h-32 sm:h-40 lg:h-48 flex items-center justify-center bg-gray-100 rounded-lg mb-4 sm:mb-6">
+            <p className="text-5xl sm:text-6xl lg:text-8xl font-bold text-gray-800">{numberSequence[index]}</p>
           </div>
           <button
             onClick={handleTap}
-            className="w-full p-6 bg-blue-600 text-white font-bold text-2xl rounded-lg shadow-md hover:bg-blue-700 transition-colors"
+            className="w-full p-4 sm:p-5 lg:p-6 bg-blue-600 text-white font-bold text-lg sm:text-xl lg:text-2xl rounded-lg shadow-md hover:bg-blue-700 transition-colors"
           >
             กดที่นี่
           </button>
         </div>
       ) : (
-        <div className="flex flex-col items-center gap-6">
+        <div className="flex flex-col items-center gap-4 sm:gap-6">
           <div className="p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded-lg w-full max-w-md text-center">
-            <p className="font-bold">การทดสอบสิ้นสุดแล้ว</p>
-            <p>กำลังไปข้อต่อไป...</p>
+            <p className="font-bold text-sm sm:text-base">การทดสอบสิ้นสุดแล้ว</p>
+            <p className="text-sm sm:text-base">กำลังไปข้อต่อไป...</p>
           </div>
         </div>
       )}

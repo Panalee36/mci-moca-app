@@ -2,6 +2,8 @@
 
 import { useTest } from '../context/TestContext';
 import Link from 'next/link';
+import { useRef } from 'react';
+import domtoimage from 'dom-to-image-more';
 
 
 
@@ -23,6 +25,7 @@ const taskDetails = {
 
 const ResultsPage = () => {
   const { scores, resetTest } = useTest();
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   const totalScore = Object.values(scores).reduce((sum, score) => (sum || 0) + (score || 0), 0);
 
@@ -50,8 +53,37 @@ const ResultsPage = () => {
 
   const interpretation = getInterpretation(totalScore);
 
+  const handleDownloadImage = () => {
+    const element = resultsRef.current;
+    if (!element) return;
+
+    element.classList.add('screenshot-mode');
+
+    domtoimage.toPng(element, {
+      quality: 1.0,
+      bgcolor: document.documentElement.classList.contains('dark') ? '#1f2937' : '#ffffff',
+      style: {
+        transform: 'scale(1)',
+        transformOrigin: 'top left',
+      }
+    })
+    .then(function (dataUrl: string) {
+        const link = document.createElement('a');
+        link.download = 'moca-test-results.png';
+        link.href = dataUrl;
+        link.click();
+    })
+    .catch(function (error: Error) {
+        console.error('oops, something went wrong!', error);
+    })
+    .finally(() => {
+        element.classList.remove('screenshot-mode');
+    });
+  };
+
   return (
-    <div className="w-full max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg my-10">
+    <div className="w-full max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 my-10">
+      <div ref={resultsRef} className="p-4 sm:p-6 lg:p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg">
       <h1 className="text-2xl sm:text-3xl font-bold text-center text-blue-800 dark:text-blue-300 mb-6">ผลการทดสอบ MoCA</h1>
 
       <div className="mb-8 p-6 bg-blue-100 dark:bg-blue-900/30 border-2 border-blue-300 dark:border-blue-500 rounded-lg text-center">
@@ -77,15 +109,21 @@ const ResultsPage = () => {
         })}
       </div>
 
-      <div className="mt-10 flex justify-center gap-4">
+      <div className="mt-10 flex flex-col sm:flex-row justify-center items-center gap-4">
         <Link href="/" passHref>
           <button
             onClick={resetTest}
-            className="px-8 sm:px-10 py-3 sm:py-4 bg-green-600 text-white font-bold rounded-lg shadow-md hover:bg-green-700 transition-colors text-base sm:text-lg dark:bg-green-700 dark:hover:bg-green-600"
+            className="px-8 sm:px-10 py-3 sm:py-4 bg-green-600 text-white font-bold rounded-lg shadow-md hover:bg-green-700 transition-colors text-base sm:text-lg dark:bg-green-700 dark:hover:bg-green-600 w-full sm:w-auto"
           >
             ทำแบบทดสอบอีกครั้ง
           </button>
         </Link>
+        <button
+          onClick={handleDownloadImage}
+          className="px-8 sm:px-10 py-3 sm:py-4 bg-blue-600 text-white font-bold rounded-lg shadow-md hover:bg-blue-700 transition-colors text-base sm:text-lg dark:bg-blue-700 dark:hover:bg-blue-600 w-full sm:w-auto"
+        >
+          บันทึกผลลัพธ์
+        </button>
       </div>
 
       <div className="mt-10 p-4 bg-gray-100 dark:bg-gray-700/50 rounded-lg text-center text-gray-600 dark:text-gray-300">
@@ -93,6 +131,7 @@ const ResultsPage = () => {
         <p className="text-sm sm:text-base">แบบทดสอบ MoCA ไม่ใช่เครื่องมือวินิจฉัยโดยตรง แต่ใช้สำหรับการคัดกรองเบื้องต้นเท่านั้น การประเมินผลที่แม่นยำควรทำโดยผู้เชี่ยวชาญทางการแพทย์</p>
       </div>
     </div>
+  </div>
   );
 };
 

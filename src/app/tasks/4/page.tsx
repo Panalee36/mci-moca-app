@@ -2,20 +2,20 @@
 
 import { useEffect, useState } from 'react';
 import { useTest } from '@/app/context/TestContext';
-import { useRouter } from 'next/navigation';
+import { TaskNavigation } from '@/app/components/TaskNavigation';
 
 const wordsToMemorize = ["จักรยาน", "บ้าน", "กล้วย", "หน้าต่าง", "แม่น้ำ"];
 
 const MemoryTask4 = () => {
-    const { updateScore, setMemorizedWords } = useTest();
+  const { updateScore, setMemorizedWords } = useTest();
   const [acknowledged, setAcknowledged] = useState(false);
-  const router = useRouter();
+
 
   useEffect(() => {
     // Store the words in the context for the recall task
     setMemorizedWords(wordsToMemorize);
     // Update score to mark this task as "completed" for navigation logic
-    updateScore(4, 0); 
+    updateScore(4, 0);
   }, [setMemorizedWords, updateScore]);
 
   return (
@@ -28,17 +28,12 @@ const MemoryTask4 = () => {
             {wordsToMemorize.map(word => <li key={word}>{word}</li>)}
           </ul>
         </div>
-        <div className="mt-6 sm:mt-8">
-          <button
-            onClick={() => {
-              setAcknowledged(true);
-              router.push('/tasks/5');
-            }}
-            disabled={acknowledged}
-            className="px-6 sm:px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-150 ease-in-out text-sm sm:text-base w-full sm:w-auto dark:bg-blue-700 dark:hover:bg-blue-600 dark:disabled:bg-gray-500 dark:focus:ring-blue-400"
-          >
-            ฉันจำได้แล้ว
-          </button>
+        <div className="mt-6 sm:mt-8 w-full flex justify-center">
+          <TaskNavigation
+            onNext={() => setAcknowledged(true)}
+            nextDisabled={acknowledged}
+            showBackButton={false}
+          />
         </div>
       </div>
     </div>

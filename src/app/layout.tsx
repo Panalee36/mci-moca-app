@@ -8,8 +8,8 @@ import { NextThemeProvider } from './theme-provider';
 const noto_sans_thai = Noto_Sans_Thai({ subsets: ["thai", "latin"], weight: ["400", "700"] });
 
 export const metadata: Metadata = {
-      title: "แบบประเมิน MoCA",
-      description: "เครื่องมือคัดกรองความสามารถทางสมองที่ทันสมัยตามแบบทดสอบ MoCA",
+  title: "แบบประเมิน MoCA",
+  description: "เครื่องมือคัดกรองความสามารถทางสมองที่ทันสมัยตามแบบทดสอบ MoCA",
 };
 
 export default function RootLayout({
@@ -23,7 +23,7 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#ffffff" />
       </head>
-            <body className={`${noto_sans_thai.className} bg-slate-50 dark:bg-gray-900`}>
+      <body className={`${noto_sans_thai.className} bg-slate-50 dark:bg-gray-900`}>
         <NextThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <TestProvider>
             <div className="min-h-screen flex flex-col">
@@ -38,6 +38,10 @@ export default function RootLayout({
               </header>
               <main className="flex-grow container mx-auto px-4 sm:px-6 py-4 sm:py-6">
                 {children}
+                <div className="mt-6 md:mt-8 text-xs md:text-sm text-gray-500 text-center pb-4 px-4 allow-select">
+                  <p>แบบทดสอบนี้ใช้เวลาประมาณ 10-15 นาที</p>
+                  <p>กรุณาทำในสภาพแวดล้อมที่เงียบและมีสมาธิ</p>
+                </div>
               </main>
             </div>
           </TestProvider>

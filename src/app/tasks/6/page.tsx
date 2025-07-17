@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTest } from '../../context/TestContext';
+import { TaskNavigation } from '../../components/TaskNavigation';
 
 
 // Generate a sequence of 30 numbers with exactly three '1's at random positions.
@@ -26,7 +27,7 @@ const numberSequence = generateSequence();
 
 
 const AttentionTask6 = () => {
-  const { updateScore, goToNextTask } = useTest();
+    const { updateScore } = useTest();
   const [index, setIndex] = useState(0);
   const [hits, setHits] = useState(0); // Correct taps on '1'
   const [errors, setErrors] = useState(0); // Incorrect taps on non-'1' numbers
@@ -71,31 +72,19 @@ const AttentionTask6 = () => {
   useEffect(() => {
     const testShouldEnd = index >= numberSequence.length;
 
-    if (isFinished || testShouldEnd) {
-      // Ensure isFinished is set if the sequence ends.
-      if (testShouldEnd && !isFinished) {
-        setIsFinished(true);
-        return; // Allow re-render to trigger the final logic.
-      }
+    if (testShouldEnd && !isFinished) {
+      setIsFinished(true);
+    }
 
+    if (isFinished) {
       // Clear any lingering timer when the test is officially over.
       if (timerRef.current) {
         clearTimeout(timerRef.current);
       }
-
       const finalScore = calculateScore();
       updateScore(6, finalScore);
-      console.log("Test finished!");
-      console.log(`Final Score: ${finalScore}`);
-      console.log(`Correct Hits: ${hits}`);
-      console.log(`Errors (taps on non-1): ${errors}`);
-
-      // Navigate after a short delay.
-      setTimeout(() => {
-        goToNextTask();
-      }, 1500);
     }
-  }, [isFinished, index, hits, errors, updateScore, goToNextTask, calculateScore]);
+  }, [isFinished, index, calculateScore, updateScore]);
 
   const handleTap = useCallback(() => {
     if (tappedForCurrentIndex.current || isFinished) {
@@ -139,8 +128,9 @@ const AttentionTask6 = () => {
         <div className="flex flex-col items-center gap-4 sm:gap-6">
           <div className="p-4 bg-green-100 border-l-4 border-green-500 text-green-700 dark:bg-green-900/50 dark:border-green-400 dark:text-green-200 rounded-lg w-full max-w-md text-center">
             <p className="font-bold text-sm sm:text-base">การทดสอบสิ้นสุดแล้ว</p>
-            <p className="text-sm sm:text-base">กำลังไปข้อต่อไป...</p>
+            <p className="text-sm sm:text-base">โปรดกดปุ่ม &quot;ถัดไป&quot; เพื่อทำแบบทดสอบข้อต่อไป</p>
           </div>
+          <TaskNavigation showBackButton={false} />
         </div>
       )}
     </div>

@@ -106,13 +106,7 @@ const LanguageTask8 = () => {
             placeholder={`พิมพ์คำที่ขึ้นต้นด้วย "${targetLetter}" ที่นี่...`}
             disabled={timeLeft === 0}
           />
-          <button
-            onClick={checkAnswers}
-            className="mt-4 px-8 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition-colors disabled:bg-gray-400 dark:bg-green-700 dark:hover:bg-green-600 dark:disabled:bg-gray-500"
-            disabled={timeLeft === 0}
-          >
-            ตรวจคำตอบ
-          </button>
+
         </div>
       ) : (
         <div className="mt-6 flex flex-col items-center gap-6">
@@ -121,7 +115,7 @@ const LanguageTask8 = () => {
             <p>คุณตอบคำที่ถูกต้องและไม่ซ้ำกันได้ {correctWordCount} คำ</p>
             <p>โปรดกดปุ่ม &quot;ถัดไป&quot; เพื่อทำแบบทดสอบข้อต่อไป</p>
           </div>
-          <TaskNavigation showBackButton={false} />
+          <TaskNavigation onFinish={() => {}} nextDisabled={score === null} showBackButton={false} />
         </div>
       )}
     </div>

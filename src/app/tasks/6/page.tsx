@@ -130,7 +130,7 @@ const AttentionTask6 = () => {
             <p className="font-bold text-sm sm:text-base">การทดสอบสิ้นสุดแล้ว</p>
             <p className="text-sm sm:text-base">โปรดกดปุ่ม &quot;ถัดไป&quot; เพื่อทำแบบทดสอบข้อต่อไป</p>
           </div>
-          <TaskNavigation showBackButton={false} />
+          <TaskNavigation />
         </div>
       )}
     </div>

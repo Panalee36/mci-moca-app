@@ -7,11 +7,10 @@ interface TaskNavigationProps {
   onNext?: () => void; // Optional callback for when the next button is clicked
   onFinish?: () => void; // Optional callback for the final task
   nextDisabled?: boolean;
-  showBackButton?: boolean;
 }
 
-export const TaskNavigation = ({ onNext, onFinish, nextDisabled = false, showBackButton = true }: TaskNavigationProps) => {
-  const { currentTask, goToNextTask, goToPreviousTask } = useTest();
+export const TaskNavigation = ({ onNext, onFinish, nextDisabled = false }: TaskNavigationProps) => {
+  const { currentTask, goToNextTask } = useTest();
 
   const handleNext = () => {
     if (onFinish) {
@@ -24,16 +23,7 @@ export const TaskNavigation = ({ onNext, onFinish, nextDisabled = false, showBac
   };
 
   return (
-    <div className={`mt-8 w-full flex flex-col sm:flex-row ${showBackButton ? 'sm:justify-between' : 'sm:justify-center'} sm:gap-4 gap-3`}>
-      {showBackButton && (
-        <button
-          onClick={goToPreviousTask}
-          disabled={currentTask <= 1}
-          className="w-full sm:w-auto px-4 sm:px-6 py-3 sm:py-2 bg-gray-300 text-gray-800 font-semibold rounded-lg shadow-md hover:bg-gray-400 disabled:bg-gray-200 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors text-sm sm:text-base order-1 sm:order-1 dark:bg-gray-600 dark:text-gray-100 dark:hover:bg-gray-500 dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
-        >
-          ย้อนกลับ
-        </button>
-      )}
+    <div className="mt-8 w-full flex flex-col sm:flex-row sm:justify-center sm:gap-4 gap-3">
       <button
         onClick={handleNext}
         disabled={nextDisabled}

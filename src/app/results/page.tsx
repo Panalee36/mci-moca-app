@@ -69,9 +69,15 @@ const ResultsPage = () => {
       }
     })
     .then(function (blob: Blob | null) {
-        if (blob) {
-          saveAs(blob, 'moca-test-results.png');
-        }
+      if (blob) {
+        const link = document.createElement('a');
+        link.download = 'moca-test-results.png';
+        link.href = URL.createObjectURL(blob);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+      }
     })
     .catch(function (error: Error) {
         console.error('oops, something went wrong!', error);

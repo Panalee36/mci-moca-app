@@ -124,7 +124,7 @@ const ClockDrawingTask9 = () => {
           onMouseDown={() => { setDragging('hour'); setHasInteracted(true); }}
           onTouchStart={(e) => { e.preventDefault(); setDragging('hour'); setHasInteracted(true); }}
         >
-          <div className="w-full h-full bg-black dark:bg-gray-200 rounded-t-full" />
+          <div className="w-full h-full bg-black rounded-t-full" />
           <div className="absolute top-0 left-1/2 w-12 h-12 bg-transparent transform -translate-x-1/2 -translate-y-1/2" />
         </div>
 
@@ -135,12 +135,12 @@ const ClockDrawingTask9 = () => {
           onMouseDown={() => { setDragging('minute'); setHasInteracted(true); }}
           onTouchStart={(e) => { e.preventDefault(); setDragging('minute'); setHasInteracted(true); }}
         >
-          <div className="w-full h-full bg-black dark:bg-gray-200 rounded-t-full" />
+          <div className="w-full h-full bg-black rounded-t-full" />
           <div className="absolute top-0 left-1/2 w-12 h-12 bg-transparent transform -translate-x-1/2 -translate-y-1/2" />
         </div>
 
         {/* Center Dot */}
-        <div className="absolute top-1/2 left-1/2 w-3 h-3 bg-black dark:bg-gray-200 rounded-full transform -translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute top-1/2 left-1/2 w-3 h-3 bg-black rounded-full transform -translate-x-1/2 -translate-y-1/2" />
       </div>
 
       <div className="mt-6 sm:mt-8">
